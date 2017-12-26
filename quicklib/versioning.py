@@ -116,7 +116,6 @@ class DevVersionCalculator(object):
         return DEV_VERSION
 
 
-# TODO: the run method used to bundle the CleanEggInfo, will we miss it here and in VersionResetToDev?
 class VersionSetByGit(VersionSetCommandBase):
     SHORTNAME="version_set_by_git"
     description = "set package version from git info"

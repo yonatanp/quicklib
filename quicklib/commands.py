@@ -6,7 +6,6 @@ from setuptools import Command
 from distutils import log
 
 
-# TODO: need initialize_options and finalize_options?
 class CleanEggInfo(Command):
     SHORTNAME = "clean_egg_info"
 
