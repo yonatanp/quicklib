@@ -24,6 +24,12 @@ def replace_module_version(module_file_path, new_version):
     open(module_file_path, "wb").write(module_code)
 
 
+def read_module_version(version_module_path):
+    version_load_vars = {}
+    execfile(version_module_path, version_load_vars)
+    return version_load_vars['__version__']
+
+
 class VersionSetCommandBase(Command):
     user_options = [
         ("writeversionfile=", None,

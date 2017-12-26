@@ -1,49 +1,29 @@
 import os
-from setuptools import setup, find_packages
 
-# TODO: in subdir-packaging, this is what is sometimes used instead of try-except:
-# >> is_packaging = os.path.basename(sys.argv[0]) == "mylib_setup.py"
 
-cmdclass = {}
-version_module_path = os.path.join(os.path.dirname(__file__), "examplepackage", "version.py")
-
-try:
+# -------- quicklib direct/bundled import, copy pasted --------------------------------------------
+import sys as _sys, glob as _glob
+is_packaging = not os.path.exists("PKG-INFO")
+if is_packaging:
     import quicklib
-    # TODO: is_packaging = quicklib.is_packaging() ?
-    is_packaging = True
-except ImportError:
-    is_packaging = False
-    # TODO: maybe from setuptools import setup here?
 else:
-    # TODO: maybe from quicklib import setup?
-    quicklib.setup_commands(cmdclass, [version_module_path])
-
-version_load_vars = {}
-execfile(version_module_path, version_load_vars)
-version = version_load_vars['__version__']
-
-
-# debug
-import sys
-with open("/Users/talila/yonatan/quicklib/examplelibrary/debug.txt", "a") as f:
-    print >> f, "examplelibrary setup: is_packaging = %s, args = %s" % (is_packaging, sys.argv)
+    zips = _glob.glob("quicklib_incorporated.*.zip")
+    if len(zips) != 1:
+        raise Exception("expected exactly one incorporated quicklib zip but found %s" % (zips,))
+    _sys.path.insert(0, zips[0]); import quicklib; _sys.path.pop(0)
+# -------------------------------------------------------------------------------------------------
 
 
-setup(
-    # needed
-    cmdclass=cmdclass,
+quicklib.setup(
+    version_module_paths=[
+        os.path.join(os.path.dirname(__file__), "examplepackage", "version.py"),
+    ],
     name='examplelibrary',
-    version=version,
     url="https://example.com/",
     author='ACME Inc.',
     author_email='user@example.com',
     description='examplelibrary: a library to demonstrate how quicklib is used to quickly setup python libraries',
     license='Copyright ACME Inc.',
-    # TODO: requirements are on the quicklib agenda
-    install_requires=[],
-    tests_require=[],
-    packages=find_packages(),
-    # package_data={'': ['*.suffix']},
     platforms='any',
     classifiers=[
         'Programming Language :: Python',

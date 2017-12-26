@@ -6,15 +6,6 @@ from setuptools import Command
 from distutils import log
 
 
-def setup_commands(cmdclass, version_modules):
-    from .versioning import VersionSetByGit, VersionResetToDev
-    cmdclass.update({
-        CleanEggInfo.SHORTNAME: CleanEggInfo,
-        VersionSetByGit.SHORTNAME: VersionSetByGit.with_version_modules(version_modules),
-        VersionResetToDev.SHORTNAME: VersionResetToDev.with_version_modules(version_modules),
-    })
-
-
 # TODO: need initialize_options and finalize_options?
 class CleanEggInfo(Command):
     SHORTNAME = "clean_egg_info"

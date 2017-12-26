@@ -1,2 +1,9 @@
 .idea
 venv
+*.pyc
+*.pyo
+quicklib/quicklib_incorporated.zip
+.DS_Store
+*.egg-info
+dist
+build
