@@ -15,9 +15,6 @@ else:
 
 
 quicklib.setup(
-    version_module_paths=[
-        os.path.join(os.path.dirname(__file__), "examplepackage", "version.py"),
-    ],
     name='examplelibrary',
     url="https://example.com/",
     author='ACME Inc.',
@@ -32,5 +29,8 @@ quicklib.setup(
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
+    version_module_paths=[
+        os.path.join(os.path.dirname(__file__), "examplepackage", "version.py"),
     ],
 )
