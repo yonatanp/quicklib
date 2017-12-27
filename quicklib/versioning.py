@@ -1,27 +1,41 @@
+import os
 import re
 import subprocess
-import types
+import textwrap
 
 from setuptools import Command
 
 
 DEV_VERSION = "0.0.0.dev0"
-RE_VERSION_CODE_LINE = re.compile("^__version__ = .*$", re.MULTILINE)
+RE_ANY_VERSION_CODE_LINE = re.compile("^__version__ = .*$", re.MULTILINE)
+RE_DEV_VERSION_CODE_LINE = re.compile("^__version__ = DEV_VERSION$", re.MULTILINE)
 
 
-def replace_module_version(module_file_path, new_version):
-    """Edits the source file and changes the code line above to point to the given `new_version`"""
-    # chomp off '.pyc' or '.pyo' if given into a clean '.py' extension
-    if module_file_path.lower().endswith(".pyc") or module_file_path.lower().endswith(".pyo"):
-        module_file_path = module_file_path[:-1]
-    module_code = open(module_file_path, "rb").read()
+def create_version_block():
+    return textwrap.dedent("""
+        # quicklib version boilerplate
+        DEV_VERSION = "0.0.0.dev0"
+        __version__ = DEV_VERSION
+        """)[1:-1]
+
+
+def replace_module_version(module_path, new_version):
+    """
+    Edits the source file on disk and changes any `__version__ = ...` code line to use `new_version`.
+    If `new_version` is equal to DEV_VERSION, the constant is used. Otherwise, explicit `new_version` is used.
+    """
+    if not isinstance(module_path, basestring):
+        raise TypeError("expected string module path, got %r" % (module_path,))
+    if not os.path.splitext(module_path)[1].lower() == ".py":
+        raise ValueError("expected module path of a python source (.py) file, got %s" % (module_path,))
+    version_module_code = open(module_path, "rb").read()
     if new_version != DEV_VERSION:
-        # setting a specific string version
-        module_code = re.sub(RE_VERSION_CODE_LINE, "__version__ = '%s'" % new_version, module_code)
+        # set from DEV_VERSION to a specific string version
+        version_module_code = re.sub(RE_DEV_VERSION_CODE_LINE, "__version__ = '%s'" % new_version, version_module_code)
     else:
-        # reverting to DEV_VERSION, just use the constant in the code line
-        module_code = re.sub(RE_VERSION_CODE_LINE, "__version__ = DEV_VERSION", module_code)
-    open(module_file_path, "wb").write(module_code)
+        # revert from any version to DEV_VERSION
+        version_module_code = re.sub(RE_ANY_VERSION_CODE_LINE, "__version__ = DEV_VERSION", version_module_code)
+    open(module_path, "wb").write(version_module_code)
 
 
 def read_module_version(version_module_path):
@@ -32,6 +46,7 @@ def read_module_version(version_module_path):
 
 class VersionSetCommandBase(Command):
     user_options = [
+        # TODO: separate this and others to an optional 'export metadata' command
         ("writeversionfile=", None,
          "path of file to be overwritten with the git-based version calculated for this build"),
     ]
@@ -39,15 +54,16 @@ class VersionSetCommandBase(Command):
     # Note: override this with all the 'version' submodules of packages you wish to version
     # See this package's 'version.py' for an example module to be copy-pasted
     # TODO: get rid of copy-pasting and auto-add version.py if possible
-    PACKAGE_VERSION_MODULES = []
+    VERSION_MODULE_PATHS = []
 
     # The way we calculate versions - implement in subclasses
     VERSION_CALCULATOR = None
 
+    # TODO: make this a code option value instead of class constant
     @classmethod
     def with_version_modules(cls, modules):
         class cls_with_version_modules(cls):
-            PACKAGE_VERSION_MODULES = list(modules)
+            VERSION_MODULE_PATHS = list(modules)
         return cls_with_version_modules
 
     def initialize_options(self):
@@ -66,17 +82,8 @@ class VersionSetCommandBase(Command):
         # change the value set in the distribution object for the following setuptools commands
         self.distribution.metadata.version = self.version
         # set versions for all modules needed
-        for version_module in self.PACKAGE_VERSION_MODULES:
-            # TODO: choose one pattern and stick to it
-            if isinstance(version_module, types.ModuleType):
-                # change the version in the already-loaded module (for this current python session)
-                version_module.__version__ = self.version
-                # actually change the code to get packaged along with the hard-coded version
-                version_module.replace_this_module_version(self.version)
-            elif isinstance(version_module, basestring):
-                replace_module_version(version_module, self.version)
-            else:
-                raise Exception("cannot update version for %r" % (version_module,))
+        for version_module_path in self.VERSION_MODULE_PATHS:
+            replace_module_version(version_module_path, self.version)
 
     def _writeVersionIfNeeded(self):
         if self.writeversionfile:
