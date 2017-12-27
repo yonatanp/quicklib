@@ -47,9 +47,6 @@ def read_module_version(version_module_path):
 
 class VersionSetCommandBase(Command):
     user_options = [
-        # TODO: separate this and others to an optional 'export metadata' command
-        ("writeversionfile=", None,
-         "path of file to be overwritten with the git-based version calculated for this build"),
         ("version-module-paths=", None,
          "list (or comma-separated) paths to modules where a __version__ line should be set")
     ]
@@ -63,7 +60,6 @@ class VersionSetCommandBase(Command):
     VERSION_CALCULATOR = None
 
     def initialize_options(self):
-        self.writeversionfile = None
         self.version_module_paths = None
 
     def finalize_options(self):
@@ -78,7 +74,6 @@ class VersionSetCommandBase(Command):
         # we generate the version of the package, update it in all needed places, and write back to user if asked nicely
         self.version = self.VERSION_CALCULATOR.getVersion()
         self._updateVersion()
-        self._writeVersionIfNeeded()
 
     def _updateVersion(self):
         # change the value set in the distribution object for the following setuptools commands
@@ -86,10 +81,6 @@ class VersionSetCommandBase(Command):
         # set versions for all modules needed
         for version_module_path in self.version_module_paths:
             replace_module_version(version_module_path, self.version)
-
-    def _writeVersionIfNeeded(self):
-        if self.writeversionfile:
-            open(self.writeversionfile, "w").write(self.version)
 
 
 class GitVersionCalculator(object):

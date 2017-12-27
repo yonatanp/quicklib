@@ -65,11 +65,12 @@ def setup(**kwargs):
 
 
 def _add_quicklib_commands(cmdclass):
-    from .commands import CleanEggInfo
+    from .commands import CleanEggInfo, ExportMetadata
     from .versioning import VersionSetByGit, VersionResetToDev
     from .incorporator import BundleIncorporatedZip, CleanAnyBundledIncorporatedZip
     cmdclass.update({
         CleanEggInfo.SHORTNAME: CleanEggInfo,
+        ExportMetadata.SHORTNAME: ExportMetadata,
         VersionSetByGit.SHORTNAME: VersionSetByGit,
         VersionResetToDev.SHORTNAME: VersionResetToDev,
         BundleIncorporatedZip.SHORTNAME: BundleIncorporatedZip,
