@@ -11,13 +11,20 @@ def is_packaging():
 
 
 def setup(**kwargs):
-    version_module_paths = kwargs.pop('version_module_paths', None)
+    kwargs.setdefault('command_options', {})
 
+    version_module_paths = kwargs.pop('version_module_paths', None)
     version = kwargs.pop('version', None)
     if version_module_paths:
         if version is not None:
             raise ValueError("when specifying `version_module_paths`, you must not also specify hard-coded `version`")
-        version = read_module_version(version_module_paths[0])
+        if is_packaging():
+            version = "ignored; replaced later by SetVersion command"
+            kwargs['command_options'] \
+                .setdefault('version_set_by_git', {}) \
+                .setdefault('version_module_paths', ('setup.py', version_module_paths))
+        else:
+            version = read_module_version(version_module_paths[0])
     else:
         if version is None:
             # TODO: auto-generated boilerplate
@@ -25,7 +32,7 @@ def setup(**kwargs):
     kwargs['version'] = version
 
     cmdclass = kwargs.pop('cmdclass', {})
-    _add_quicklib_commands(cmdclass, version_module_paths)
+    _add_quicklib_commands(cmdclass)
     kwargs['cmdclass'] = cmdclass
 
     if 'packages' not in kwargs:
@@ -57,14 +64,14 @@ def setup(**kwargs):
     return setuptools.setup(**kwargs)
 
 
-def _add_quicklib_commands(cmdclass, version_modules=None):
+def _add_quicklib_commands(cmdclass):
     from .commands import CleanEggInfo
     from .versioning import VersionSetByGit, VersionResetToDev
     from .incorporator import BundleIncorporatedZip, CleanAnyBundledIncorporatedZip
     cmdclass.update({
         CleanEggInfo.SHORTNAME: CleanEggInfo,
-        VersionSetByGit.SHORTNAME: VersionSetByGit.with_version_modules(version_modules),
-        VersionResetToDev.SHORTNAME: VersionResetToDev.with_version_modules(version_modules),
+        VersionSetByGit.SHORTNAME: VersionSetByGit,
+        VersionResetToDev.SHORTNAME: VersionResetToDev,
         BundleIncorporatedZip.SHORTNAME: BundleIncorporatedZip,
         CleanAnyBundledIncorporatedZip.SHORTNAME: CleanAnyBundledIncorporatedZip,
     })

@@ -10,7 +10,7 @@ version_module_path = os.path.join(os.path.dirname(__file__), "quicklib", "versi
 is_packaging = not os.path.exists("PKG-INFO")
 if is_packaging:
     import quicklib.autosetup
-    quicklib.autosetup.setup_self_setup_commands(cmdclass, [version_module_path])
+    quicklib.autosetup.setup_self_setup_commands(cmdclass)
     version = None
 else:
     import quicklib
@@ -41,4 +41,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Operating System :: OS Independent',
     ],
+    command_options={
+        'version_set_by_git': {'version_module_paths': ('setup.py', version_module_path)},
+    }
 )

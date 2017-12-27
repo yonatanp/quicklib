@@ -4,6 +4,7 @@ import subprocess
 import textwrap
 
 from setuptools import Command
+from distutils import log
 
 
 DEV_VERSION = "0.0.0.dev0"
@@ -49,6 +50,8 @@ class VersionSetCommandBase(Command):
         # TODO: separate this and others to an optional 'export metadata' command
         ("writeversionfile=", None,
          "path of file to be overwritten with the git-based version calculated for this build"),
+        ("version-module-paths=", None,
+         "list (or comma-separated) paths to modules where a __version__ line should be set")
     ]
 
     # Note: override this with all the 'version' submodules of packages you wish to version
@@ -59,18 +62,17 @@ class VersionSetCommandBase(Command):
     # The way we calculate versions - implement in subclasses
     VERSION_CALCULATOR = None
 
-    # TODO: make this a code option value instead of class constant
-    @classmethod
-    def with_version_modules(cls, modules):
-        class cls_with_version_modules(cls):
-            VERSION_MODULE_PATHS = list(modules)
-        return cls_with_version_modules
-
     def initialize_options(self):
         self.writeversionfile = None
+        self.version_module_paths = None
 
     def finalize_options(self):
-        pass
+        if self.version_module_paths is None:
+            self.version_module_paths = []
+        elif isinstance(self.version_module_paths, basestring):
+            self.version_module_paths = self.version_module_paths.split(",")
+        if not self.version_module_paths:
+            log.warn("warning: no version_module_paths provided, SetVersion command will have no effect")
 
     def run(self):
         # we generate the version of the package, update it in all needed places, and write back to user if asked nicely
@@ -82,7 +84,7 @@ class VersionSetCommandBase(Command):
         # change the value set in the distribution object for the following setuptools commands
         self.distribution.metadata.version = self.version
         # set versions for all modules needed
-        for version_module_path in self.VERSION_MODULE_PATHS:
+        for version_module_path in self.version_module_paths:
             replace_module_version(version_module_path, self.version)
 
     def _writeVersionIfNeeded(self):
@@ -117,19 +119,30 @@ class GitVersionCalculator(object):
         return version
 
 
-# Used to "revert to dev version"
-class DevVersionCalculator(object):
-    def getVersion(self):
-        return DEV_VERSION
-
-
 class VersionSetByGit(VersionSetCommandBase):
-    SHORTNAME="version_set_by_git"
-    description = "set package version from git info"
+    SHORTNAME = "version_set_by_git"
+    description = "set library version from git info"
     VERSION_CALCULATOR = GitVersionCalculator()
 
 
-class VersionResetToDev(VersionSetCommandBase):
-    SHORTNAME="version_reset_to_dev"
-    description = "reset package version to DEV_VERSION"
-    VERSION_CALCULATOR = DevVersionCalculator()
+# TODO: cleanup such as this should be in some "try: finally:" construct
+class VersionResetToDev(Command):
+    SHORTNAME = "version_reset_to_dev"
+    description = "reset library version to DEV_VERSION"
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        if VersionSetByGit.SHORTNAME not in self.distribution.command_obj:
+            raise Exception("%s command expects a %s command to precede it" % (
+                self.SHORTNAME, VersionSetByGit.SHORTNAME,
+            ))
+        version_module_paths = self.distribution.command_obj[VersionSetByGit.SHORTNAME].version_module_paths
+        for version_module_path in version_module_paths:
+            replace_module_version(version_module_path, DEV_VERSION)
