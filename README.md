@@ -14,6 +14,16 @@ Or clone this repo and run:
 
 ## Creating libraries
 
+**TL;DR** - run `python -m quicklib.bootstrap` in a new folder and answer some questions, and you're good to go coding. Look at [examplelibrary](examplelibrary/) for an example created with this bootstrap process.
+
+Also, your library needs to be in a git-managed folder, and needs at least one numeric `major.minor` tag in your current history.
+
+If you have no version tags yet, create the first one now and push it:
+
+    git tag -a 0.1 -m "first version tag: 0.1"
+    git push origin 0.1
+
+
 ### File structure
 
 The recommended library file structure is something like:
@@ -22,6 +32,7 @@ The recommended library file structure is something like:
 mylibrary/
   |-- setup.py
   |-- README.md
+  |-- MANIFEST.in
   mypackage/
     |-- __init__.py
     |-- version.py
@@ -35,6 +46,14 @@ mylibrary/
 If you want to include more than one top-level package in your library, place additional ones next to `mypackage`.
 
 For a deeper dive into recommended structure and other possible options, check out [Structuring Your Project](http://docs.python-guide.org/en/latest/writing/structure/) at the Hitchhiker's Guide to Python.
+
+### MANIFEST.in
+
+Create this file with fixed content:
+
+    include quicklib/quicklib_incorporated.zip
+    
+This is a technical requirement of the quicklib library.
 
 ### Setup script
 
