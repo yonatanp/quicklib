@@ -8,7 +8,7 @@ Install using:
 
     pip install quicklib
 
-Or clone this repo and run:
+Or clone this project's [repo](https://github.com/yonatanp/quicklib) and run:
 
     python setup.py install
 
@@ -108,7 +108,7 @@ Modified parameter defaults:
 
 ### Versioning
 
-The build process automatically sets your library version based on the git log and tags. This version information is applied to the built library and can later be programatically queried by library package users.
+The build process automatically sets your library version based on the git log and tags. This version information is applied to the built library and can later be programmatically queried by library package users.
 
 #### version value inference
 
@@ -138,7 +138,7 @@ In addition, tell `setup.py` where to find those files:
     )
 ````
 
-Then, your users can programtically query this version value by running e.g.:
+Then, your users can programmatically query this version value by running e.g.:
 ````Python
     import mypackage
     print mypackage.version.__version__

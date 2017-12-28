@@ -17,6 +17,8 @@ else:
     import quicklib
     version = quicklib.read_module_version(version_module_path)
 
+long_description = open("README.rst", "r").read()
+
 script_args = sys.argv[1:]
 if is_packaging:
     script_args = (
@@ -32,6 +34,7 @@ setup(
     author='Yonatan Perry',
     author_email='yonatan.perry@gmail.com',
     description='quicklib: hassle-free setup scripts for your python libraries',
+    long_description=long_description,
     license='MIT',
     install_requires=[],
     tests_require=[],
@@ -40,6 +43,7 @@ setup(
     platforms='any',
     classifiers=[
         'Development Status :: 4 - Beta',
+        'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'License :: OSI Approved :: MIT License',
