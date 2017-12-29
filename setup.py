@@ -10,8 +10,12 @@ version_module_path = os.path.join(os.path.dirname(__file__), "quicklib", "versi
 
 is_packaging = not os.path.exists("PKG-INFO")
 if is_packaging:
-    import quicklib.autosetup
-    quicklib.autosetup.setup_self_setup_commands(cmdclass)
+    from quicklib.setupapi import SetupModifier
+    from quicklib.incorporator import CreateIncorporatedZip
+    cmdclass.update(SetupModifier.get_quicklib_commands())
+    cmdclass.update({
+        CreateIncorporatedZip.SHORTNAME: CreateIncorporatedZip,
+    })
     version = None
 else:
     import quicklib
