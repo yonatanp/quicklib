@@ -51,11 +51,6 @@ class VersionSetCommandBase(Command):
          "list (or comma-separated) paths to modules where a __version__ line should be set")
     ]
 
-    # Note: override this with all the 'version' submodules of packages you wish to version
-    # See this package's 'version.py' for an example module to be copy-pasted
-    # TODO: get rid of copy-pasting and auto-add version.py if possible
-    VERSION_MODULE_PATHS = []
-
     # The way we calculate versions - implement in subclasses
     VERSION_CALCULATOR = None
 
