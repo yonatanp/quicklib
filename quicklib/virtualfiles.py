@@ -54,6 +54,10 @@ def open_file(path, binary=False):
         virtual_file_registry.register_file_for_removal(path)
 
 
+def register_for_removal(path):
+    virtual_file_registry.register_file_for_removal(path)
+
+
 class RemoveVirtualFiles(Command):
     SHORTNAME = "remove_virtual_files"
 

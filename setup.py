@@ -1,4 +1,4 @@
-# caveat emptor: this is quicklib's own setup.py.
+# WARNING: this is quicklib's own setup.py.
 # it is NOT an example of how to write a setup.py that USES quicklib.
 # if you're looking for an example, look at `examplelibrary/setup.py`.
 import os
@@ -12,9 +12,11 @@ is_packaging = not os.path.exists("PKG-INFO")
 if is_packaging:
     from quicklib.setupapi import SetupModifier
     from quicklib.incorporator import CreateIncorporatedZip
+    from quicklib.virtualfiles import RemoveVirtualFiles
     cmdclass.update(SetupModifier.get_quicklib_commands())
     cmdclass.update({
         CreateIncorporatedZip.SHORTNAME: CreateIncorporatedZip,
+        RemoveVirtualFiles.SHORTNAME: RemoveVirtualFiles,
     })
     version = None
 else:
@@ -28,7 +30,7 @@ if is_packaging:
     script_args = (
         ["clean_egg_info", "version_set_by_git", "create_incorporated_zip"] +
         script_args +
-        ["version_reset_to_dev"]
+        ["version_reset_to_dev", "remove_virtual_files"]
     )
 
 setup(

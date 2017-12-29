@@ -11,7 +11,7 @@ from distutils import log
 import quicklib
 import quicklib.version
 from .versioning import DEV_VERSION
-from .virtualfiles import put_file
+from .virtualfiles import register_for_removal
 
 QL_INCORPORATED = 'quicklib_incorporated'
 QL_INCORPORATED_ZIP = QL_INCORPORATED + '.zip'
@@ -38,6 +38,7 @@ class CreateIncorporatedZip(Command):
         log.info("incorporating %s from %s" % (QL_INCORPORATED_ZIP, os.path.abspath(quicklib_path)))
         self.zip(quicklib_path, temp_path)
         shutil.move(temp_path, final_path)
+        register_for_removal(final_path)
 
     def zip(self, source_path, target_path):
         # python equivalent of: zip -r quicklib_incorporated.zip quicklib -i '*.py'
@@ -95,7 +96,8 @@ class BundleIncorporatedZip(Command):
             # we'd rather raise here than risk users being stuck on this elusive point and missing a warning line
             raise Exception("MANIFEST.in does not contain the line '%s', you're probably creating a broken build!" %
                             hint_manifest_line)
-        put_file(bundled_zip_name, open(zip_path, "rb").read(), binary=True)
+        shutil.copy(zip_path, bundled_zip_name)
+        register_for_removal(bundled_zip_name)
 
 
 # this tells the library whether it's using a fresh (source tree) or incorporated (zip) quicklib
