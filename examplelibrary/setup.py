@@ -33,4 +33,7 @@ quicklib.setup(
     version_module_paths=[
         os.path.join(os.path.dirname(__file__), "examplepackage", "version.py"),
     ],
+    module_level_scripts={
+        'examplescript': 'examplepackage.examplescript',
+    },
 )
