@@ -6,9 +6,9 @@ import setuptools
 from .versioning import read_module_version
 from .commands import CleanEggInfo, ExportMetadata
 from .versioning import VersionSetByGit, VersionResetToDev
-from .incorporator import BundleIncorporatedZip, CleanAnyBundledIncorporatedZip
+from .incorporator import BundleIncorporatedZip
 from .scripting import CreateScriptHooks
-from .virtualfiles import RemoveVirtualFiles
+from .virtualfiles import RemoveVirtualFiles, remove_virtual_files
 
 
 def is_packaging():
@@ -88,9 +88,7 @@ class SetupModifier(object):
             script_args += orig_script_args
             if self.version_module_paths:
                 script_args += [VersionResetToDev.SHORTNAME]
-            script_args += [CleanAnyBundledIncorporatedZip.SHORTNAME]
-            if self.module_level_scripts:
-                script_args += [RemoveVirtualFiles.SHORTNAME]
+            script_args += [RemoveVirtualFiles.SHORTNAME]
             kwargs['script_args'] = script_args
 
     @classmethod
@@ -99,7 +97,7 @@ class SetupModifier(object):
             cmd_class.SHORTNAME: cmd_class
             for cmd_class in [
                 CleanEggInfo, ExportMetadata, VersionSetByGit, VersionResetToDev, BundleIncorporatedZip,
-                CleanAnyBundledIncorporatedZip, CreateScriptHooks, RemoveVirtualFiles,
+                CreateScriptHooks, RemoveVirtualFiles,
             ]
         }
 
@@ -118,4 +116,11 @@ def setup(**kwargs):
         sm.set_version_modules(kwargs.pop('version_module_paths'))
     if 'module_level_scripts' in kwargs:
         sm.set_module_level_scripts(kwargs.pop('module_level_scripts'))
-    return sm.setup(**kwargs)
+    try:
+        return sm.setup(**kwargs)
+    except:
+        try:
+            remove_virtual_files()
+        except Exception as exc:
+            print "ignoring exception thrown from error-case call to remove_virtual_files (%s)" % exc
+        raise

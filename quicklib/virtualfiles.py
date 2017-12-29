@@ -67,3 +67,7 @@ class RemoveVirtualFiles(Command):
 
     def run(self):
         virtual_file_registry.remove(pre_callback=lambda fn: log.info("cleaning up virtual file %s..." % fn))
+
+
+def remove_virtual_files():
+    virtual_file_registry.remove()
