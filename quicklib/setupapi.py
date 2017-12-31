@@ -57,11 +57,15 @@ class SetupModifier(object):
                 .setdefault('entry_points', {}) \
                 .setdefault('console_scripts', []) \
                 .extend([
-                    "%(script_name)s=%(script_hook_name)s:main" % dict(
+                    "%(script_name)s=%(hook_module)s:%(func_name)s" % dict(
                         script_name=script_name,
-                        script_hook_name=CreateScriptHooks.module_to_script_hook_module(module_name),
+                        hook_module=hook_module,
+                        func_name=func_name,
                     )
-                    for (script_name, module_name) in self.module_level_scripts.iteritems()
+                    for (script_name, (_, hook_module, func_name)) in zip(
+                        self.module_level_scripts.keys(),
+                        CreateScriptHooks.target_module_names_to_hook_module_and_func_name(self.module_level_scripts.values())
+                    )
                 ])
 
         if self.auto_find_packages and 'packages' not in kwargs:
@@ -84,7 +88,7 @@ class SetupModifier(object):
             if self.version_module_paths:
                 script_args += [VersionSetByGit.SHORTNAME]
             if self.module_level_scripts:
-                script_args += [CreateScriptHooks.SHORTNAME]
+                script_args += [CreateScriptHooks.SHORTNAME, CreateScriptHooks.SHORTNAME]
             script_args += orig_script_args
             script_args += [UndoVirtualFiles.SHORTNAME]
             kwargs['script_args'] = script_args
