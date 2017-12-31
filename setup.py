@@ -12,11 +12,11 @@ is_packaging = not os.path.exists("PKG-INFO")
 if is_packaging:
     from quicklib.setupapi import SetupModifier
     from quicklib.incorporator import CreateIncorporatedZip
-    from quicklib.virtualfiles import RemoveVirtualFiles
+    from quicklib.virtualfiles import UndoVirtualFiles
     cmdclass.update(SetupModifier.get_quicklib_commands())
     cmdclass.update({
         CreateIncorporatedZip.SHORTNAME: CreateIncorporatedZip,
-        RemoveVirtualFiles.SHORTNAME: RemoveVirtualFiles,
+        UndoVirtualFiles.SHORTNAME: UndoVirtualFiles,
     })
     version = None
 else:
@@ -30,7 +30,7 @@ if is_packaging:
     script_args = (
         ["clean_egg_info", "version_set_by_git", "create_incorporated_zip"] +
         script_args +
-        ["version_reset_to_dev", "remove_virtual_files"]
+        ["undo_virtual_files"]
     )
 
 setup(

@@ -5,10 +5,10 @@ import setuptools
 
 from .versioning import read_module_version
 from .commands import CleanEggInfo, ExportMetadata
-from .versioning import VersionSetByGit, VersionResetToDev
+from .versioning import VersionSetByGit
 from .incorporator import BundleIncorporatedZip
 from .scripting import CreateScriptHooks
-from .virtualfiles import RemoveVirtualFiles, remove_virtual_files
+from .virtualfiles import UndoVirtualFiles, undo_virtual_files
 
 
 def is_packaging():
@@ -86,9 +86,7 @@ class SetupModifier(object):
             if self.module_level_scripts:
                 script_args += [CreateScriptHooks.SHORTNAME]
             script_args += orig_script_args
-            if self.version_module_paths:
-                script_args += [VersionResetToDev.SHORTNAME]
-            script_args += [RemoveVirtualFiles.SHORTNAME]
+            script_args += [UndoVirtualFiles.SHORTNAME]
             kwargs['script_args'] = script_args
 
     @classmethod
@@ -96,8 +94,8 @@ class SetupModifier(object):
         return {
             cmd_class.SHORTNAME: cmd_class
             for cmd_class in [
-                CleanEggInfo, ExportMetadata, VersionSetByGit, VersionResetToDev, BundleIncorporatedZip,
-                CreateScriptHooks, RemoveVirtualFiles,
+                CleanEggInfo, ExportMetadata, VersionSetByGit, BundleIncorporatedZip, CreateScriptHooks,
+                UndoVirtualFiles,
             ]
         }
 
@@ -120,7 +118,8 @@ def setup(**kwargs):
         return sm.setup(**kwargs)
     except:
         try:
-            remove_virtual_files()
+            print "quicklib.setup: emergency undoing of all virtual file changes"
+            undo_virtual_files()
         except Exception as exc:
-            print "ignoring exception thrown from error-case call to remove_virtual_files (%s)" % exc
+            print "ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc
         raise

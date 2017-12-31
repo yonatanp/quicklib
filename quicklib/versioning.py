@@ -6,37 +6,19 @@ import textwrap
 from setuptools import Command
 from distutils import log
 
+from .virtualfiles import modify_file
 
 DEV_VERSION = "0.0.0.dev0"
-RE_ANY_VERSION_CODE_LINE = re.compile("^__version__ = .*$", re.MULTILINE)
-RE_DEV_VERSION_CODE_LINE = re.compile("^__version__ = DEV_VERSION$", re.MULTILINE)
+
+RE_VERSION_CODE_LINE = re.compile("^__version__ *= *.*$", re.MULTILINE)
 
 
 def create_version_block():
     return textwrap.dedent("""
         # quicklib version boilerplate
-        DEV_VERSION = "0.0.0.dev0"
+        DEV_VERSION = "%(DEV_VERSION)s"
         __version__ = DEV_VERSION
-        """)[1:-1]
-
-
-def replace_module_version(module_path, new_version):
-    """
-    Edits the source file on disk and changes any `__version__ = ...` code line to use `new_version`.
-    If `new_version` is equal to DEV_VERSION, the constant is used. Otherwise, explicit `new_version` is used.
-    """
-    if not isinstance(module_path, basestring):
-        raise TypeError("expected string module path, got %r" % (module_path,))
-    if not os.path.splitext(module_path)[1].lower() == ".py":
-        raise ValueError("expected module path of a python source (.py) file, got %s" % (module_path,))
-    version_module_code = open(module_path, "rb").read()
-    if new_version != DEV_VERSION:
-        # set from DEV_VERSION to a specific string version
-        version_module_code = re.sub(RE_DEV_VERSION_CODE_LINE, "__version__ = '%s'" % new_version, version_module_code)
-    else:
-        # revert from any version to DEV_VERSION
-        version_module_code = re.sub(RE_ANY_VERSION_CODE_LINE, "__version__ = DEV_VERSION", version_module_code)
-    open(module_path, "wb").write(version_module_code)
+        """ % dict(DEV_VERSION=DEV_VERSION))[1:-1]
 
 
 def read_module_version(version_module_path):
@@ -75,7 +57,25 @@ class VersionSetCommandBase(Command):
         self.distribution.metadata.version = self.version
         # set versions for all modules needed
         for version_module_path in self.version_module_paths:
-            replace_module_version(version_module_path, self.version)
+            self._virtual_replace_module_version(version_module_path, self.version)
+
+    @classmethod
+    def _virtual_replace_module_version(cls, module_path, new_version):
+        """
+        Edits the source file on disk and changes any `__version__ = ...` code line to use `new_version`.
+        """
+        if not isinstance(module_path, basestring):
+            raise TypeError("expected string module path, got %r" % (module_path,))
+        if not os.path.splitext(module_path)[1].lower() == ".py":
+            raise ValueError("expected module path of a python source (.py) file, got %s" % (module_path,))
+        version_module_code = open(module_path, "rb").read()
+        if not re.search(RE_VERSION_CODE_LINE, version_module_code):
+            raise Exception("no version line (matching %s) found in %s, unable to replace module version" % (
+                RE_VERSION_CODE_LINE, module_path,
+            ))
+        # set any version line to the given specific string version (virtual - for package only)
+        modified_code = re.sub(RE_VERSION_CODE_LINE, "__version__ = '%s'" % new_version, version_module_code)
+        modify_file(module_path, modified_code, binary=True)
 
 
 class GitVersionCalculator(object):
@@ -109,26 +109,3 @@ class VersionSetByGit(VersionSetCommandBase):
     SHORTNAME = "version_set_by_git"
     description = "set library version from git info"
     VERSION_CALCULATOR = GitVersionCalculator()
-
-
-# TODO: cleanup such as this should be in some "try: finally:" construct
-class VersionResetToDev(Command):
-    SHORTNAME = "version_reset_to_dev"
-    description = "reset library version to DEV_VERSION"
-
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        if VersionSetByGit.SHORTNAME not in self.distribution.command_obj:
-            raise Exception("%s command expects a %s command to precede it" % (
-                self.SHORTNAME, VersionSetByGit.SHORTNAME,
-            ))
-        version_module_paths = self.distribution.command_obj[VersionSetByGit.SHORTNAME].version_module_paths
-        for version_module_path in version_module_paths:
-            replace_module_version(version_module_path, DEV_VERSION)
