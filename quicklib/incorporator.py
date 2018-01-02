@@ -70,6 +70,8 @@ def create_bootstrap_block():
 class BundleIncorporatedZip(Command):
     SHORTNAME = "bundle_incorporated_zip"
 
+    REQUIRED_MANIFEST_LINE = "include %s.v*.zip" % QL_INCORPORATED
+
     user_options = []
 
     def initialize_options(self):
@@ -86,15 +88,14 @@ class BundleIncorporatedZip(Command):
                             os.path.dirname(os.path.abspath(quicklib.__file__)))
         zip_path = pkg_resources.resource_filename('quicklib', QL_INCORPORATED_ZIP)
         bundled_zip_name = "%s.v%s.zip" % (QL_INCORPORATED, version)
-        hint_manifest_line = "include %s.v*.zip" % QL_INCORPORATED
         log.info("bundling %s as %s (make sure your MANIFEST.in contains %s)" % (
-            zip_path, bundled_zip_name, hint_manifest_line))
+            zip_path, bundled_zip_name, self.REQUIRED_MANIFEST_LINE))
         if not os.path.exists("MANIFEST.in"):
             raise Exception("MANIFEST.in not found, aborting, quicklib will not be bundled without one!")
-        if hint_manifest_line not in map(str.strip, open("MANIFEST.in", "r").readlines()):
+        if self.REQUIRED_MANIFEST_LINE not in map(str.strip, open("MANIFEST.in", "r").readlines()):
             # we'd rather raise here than risk users being stuck on this elusive point and missing a warning line
             raise Exception("MANIFEST.in does not contain the line '%s', you're probably creating a broken build!" %
-                            hint_manifest_line)
+                            self.REQUIRED_MANIFEST_LINE)
         shutil.copy(zip_path, bundled_zip_name)
         register_for_removal(bundled_zip_name)
 

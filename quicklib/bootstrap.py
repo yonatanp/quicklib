@@ -53,9 +53,6 @@ def new_library(path, args):
         Contact %(author)s at %(author_email)s
             
     """)
-    tm.put_file("MANIFEST.in", """
-        include quicklib_incorporated.v*.zip
-    """)
     tm.put_file("setup.py", """
         import os
         

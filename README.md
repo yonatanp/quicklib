@@ -32,7 +32,6 @@ The recommended library file structure is something like:
 mylibrary/
   |-- setup.py
   |-- README.md
-  |-- MANIFEST.in
   mypackage/
     |-- __init__.py
     |-- version.py
@@ -46,14 +45,6 @@ mylibrary/
 If you want to include more than one top-level package in your library, place additional ones next to `mypackage`.
 
 For a deeper dive into recommended structure and other possible options, check out [Structuring Your Project](http://docs.python-guide.org/en/latest/writing/structure/) at the Hitchhiker's Guide to Python.
-
-### MANIFEST.in
-
-Create this file with fixed content:
-
-    include quicklib/quicklib_incorporated.zip
-    
-This is a technical requirement of the quicklib library.
 
 ### Setup script
 

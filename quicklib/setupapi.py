@@ -9,6 +9,7 @@ from .versioning import VersionSetByGit
 from .incorporator import BundleIncorporatedZip
 from .scripting import CreateScriptHooks
 from .virtualfiles import UndoVirtualFiles, undo_virtual_files
+from .datafiles import PrepareManifestIn
 
 
 def is_packaging():
@@ -34,6 +35,10 @@ class SetupModifier(object):
         return setuptools.setup(**kwargs)
 
     def _modify_setup_kwargs(self, kwargs):
+        self.cmd_opt_setdefault(kwargs, 'prepare_manifest_in', 'extra_lines', []).extend([
+            BundleIncorporatedZip.REQUIRED_MANIFEST_LINE,
+        ])
+
         if kwargs.pop('version', None) is not None and self.version_module_paths:
             raise ValueError("when specifying version modules, you must not also specify hard-coded `version` in setup")
         if kwargs.pop('version', None) is None and not self.version_module_paths:
@@ -41,18 +46,12 @@ class SetupModifier(object):
         if self.version_module_paths:
             if is_packaging():
                 kwargs['version'] = "ignored; replaced later by SetVersion command"
-                kwargs \
-                    .setdefault('command_options', {}) \
-                    .setdefault('version_set_by_git', {}) \
-                    .setdefault('version_module_paths', ('setup.py', self.version_module_paths))
+                self.cmd_opt_setdefault(kwargs, 'version_set_by_git', 'version_module_paths', self.version_module_paths)
             else:
                 kwargs['version'] = read_module_version(self.version_module_paths[0])
 
         if self.module_level_scripts:
-            kwargs \
-                .setdefault('command_options', {}) \
-                .setdefault('create_script_hooks', {}) \
-                .setdefault('script_modules', ('setup.py', self.module_level_scripts.values()))
+            self.cmd_opt_setdefault(kwargs, 'create_script_hooks', 'script_modules', self.module_level_scripts.values())
             kwargs \
                 .setdefault('entry_points', {}) \
                 .setdefault('console_scripts', []) \
@@ -84,6 +83,7 @@ class SetupModifier(object):
             orig_script_args = kwargs.pop('script_args', sys.argv[1:])
             script_args = []
             script_args += [CleanEggInfo.SHORTNAME]
+            script_args += [PrepareManifestIn.SHORTNAME]
             script_args += [BundleIncorporatedZip.SHORTNAME]
             if self.version_module_paths:
                 script_args += [VersionSetByGit.SHORTNAME]
@@ -99,11 +99,16 @@ class SetupModifier(object):
             cmd_class.SHORTNAME: cmd_class
             for cmd_class in [
                 CleanEggInfo, ExportMetadata, VersionSetByGit, BundleIncorporatedZip, CreateScriptHooks,
-                UndoVirtualFiles,
+                UndoVirtualFiles, PrepareManifestIn,
             ]
         }
 
+    @classmethod
+    def cmd_opt_setdefault(cls, kwargs, cmd, opt, default):
+        return kwargs.setdefault('command_options', {}).setdefault(cmd, {}).setdefault(opt, ('setup.py', default))[1]
 
+
+# TODO: can this be replaced by a Distribution subclass? some of it?
 def setup(**kwargs):
     """
     setup a-la quicklib
