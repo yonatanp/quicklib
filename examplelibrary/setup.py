@@ -30,6 +30,7 @@ quicklib.setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    freeze_requirements=True,
     version_module_paths=[
         os.path.join(os.path.dirname(__file__), "examplepackage", "version.py"),
     ],

@@ -42,7 +42,9 @@ setup(
     description='quicklib: hassle-free setup scripts for your python libraries',
     long_description=long_description,
     license='MIT',
-    install_requires=[],
+    install_requires=[
+        'yarg==0.1.9',
+    ],
     tests_require=[],
     packages=find_packages(),
     package_data={'quicklib': ['quicklib_incorporated.zip']},

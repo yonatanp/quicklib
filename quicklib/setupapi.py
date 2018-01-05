@@ -3,6 +3,7 @@ import sys
 
 import setuptools
 
+from .utils import is_packaging
 from .versioning import read_module_version
 from .commands import CleanEggInfo, ExportMetadata
 from .versioning import VersionSetByGit
@@ -10,17 +11,22 @@ from .incorporator import BundleIncorporatedZip
 from .scripting import CreateScriptHooks
 from .virtualfiles import UndoVirtualFiles, undo_virtual_files
 from .datafiles import PrepareManifestIn
-
-
-def is_packaging():
-    return not os.path.exists("PKG-INFO")
+from .requirements import UseRequirementsTxtCommand, DynamicRequirementsCommand, FreezeRequirementsCommand
 
 
 class SetupModifier(object):
     def __init__(self, auto_find_packages=True):
         self.auto_find_packages = auto_find_packages
+        self.use_requirements_txt = True
+        self.freeze_requirements = False
         self.version_module_paths = []
         self.module_level_scripts = {}
+
+    def set_use_requirements_txt(self, flag_value):
+        self.use_requirements_txt = flag_value
+
+    def set_freeze_requirements(self, flag_value):
+        self.freeze_requirements = flag_value
 
     def set_version_modules(self, module_paths):
         if not all(os.path.isfile(p) for p in module_paths):
@@ -69,16 +75,17 @@ class SetupModifier(object):
             for p in kwargs['packages']:
                 print "  - %s" % (p,)
 
-        # # TODO: requirements are on the agenda
-        # if 'install_requires' not in kwargs:
-        #     pass
-
         kwargs.setdefault('cmdclass', {}).update(self.get_quicklib_commands())
 
+        orig_script_args = kwargs.pop('script_args', sys.argv[1:])
+        script_args = []
         if is_packaging():
-            orig_script_args = kwargs.pop('script_args', sys.argv[1:])
-            script_args = []
             script_args += [CleanEggInfo.SHORTNAME]
+            if self.use_requirements_txt:
+                script_args += [UseRequirementsTxtCommand.SHORTNAME]
+            if self.freeze_requirements:
+                script_args += [FreezeRequirementsCommand.SHORTNAME]
+            script_args += [DynamicRequirementsCommand.SHORTNAME]
             script_args += [BundleIncorporatedZip.SHORTNAME]
             if self.version_module_paths:
                 script_args += [VersionSetByGit.SHORTNAME]
@@ -87,7 +94,10 @@ class SetupModifier(object):
             script_args += [PrepareManifestIn.SHORTNAME]
             script_args += orig_script_args
             script_args += [UndoVirtualFiles.SHORTNAME]
-            kwargs['script_args'] = script_args
+        else:
+            script_args += [DynamicRequirementsCommand.SHORTNAME]
+            script_args += orig_script_args
+        kwargs['script_args'] = script_args
 
     @classmethod
     def get_quicklib_commands(cls):
@@ -95,7 +105,8 @@ class SetupModifier(object):
             cmd_class.SHORTNAME: cmd_class
             for cmd_class in [
                 CleanEggInfo, ExportMetadata, VersionSetByGit, BundleIncorporatedZip, CreateScriptHooks,
-                UndoVirtualFiles, PrepareManifestIn,
+                UndoVirtualFiles, PrepareManifestIn, UseRequirementsTxtCommand, FreezeRequirementsCommand,
+                DynamicRequirementsCommand,
             ]
         }
 
@@ -115,6 +126,10 @@ def setup(**kwargs):
     :return:
     """
     sm = SetupModifier()
+    if 'use_requirements_txt' in kwargs:
+        sm.set_use_requirements_txt(kwargs.pop('use_requirements_txt'))
+    if 'freeze_requirements' in kwargs:
+        sm.set_freeze_requirements(kwargs.pop('freeze_requirements'))
     if 'version_module_paths' in kwargs:
         sm.set_version_modules(kwargs.pop('version_module_paths'))
     if 'module_level_scripts' in kwargs:

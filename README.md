@@ -32,6 +32,7 @@ The recommended library file structure is something like:
 mylibrary/
   |-- setup.py
   |-- README.md
+  |-- [requirements.txt]
   mypackage/
     |-- __init__.py
     |-- version.py
@@ -140,3 +141,21 @@ Then, your users can programmatically query this version value by running e.g.:
 If your library contains multiple top-level packages, a `version.py` file should usually be added under each of them.
 This allows your library users to ask about the version of each of your individual packages while being agnostic to the fact that they come from the same library.
 If you find this confusing, you may want to stick to one top-level package per library.
+
+### Requirements
+
+To add requirements to your library, add them in a `requirements.txt` file at the project root.
+
+Use syntax such as:
+
+    numpy
+    pandas==0.18.1
+    yarg~=0.1.1
+
+#### Freezing requirements
+
+Sometimes you want to hardcode the versions of your dependencies. This helps provide your users the exact same configuration you built and tested with. To avoid having to manually update those numbers, you can keep your requirements specified as usual but activate "requirement freezing".
+
+Do this by passing `freeze_requirements=True` to the `quicklib.setup(...)` call in `setup.py`.
+
+Note: if your library depends on a hardcoded `dep==1.0` but `dep` did not hardcode its dependencies, your users might get different packages. To get around that you can specify your requirements' requirements as your own requirements. Automatically fetching this information is on this library's roadmap.
