@@ -1,6 +1,5 @@
 import os
 
-import yarg
 from setuptools import Command
 from distutils import log
 from pkg_resources import Requirement, parse_requirements
@@ -67,6 +66,8 @@ class FreezeRequirementsCommand(Command):
         self.distribution.install_requires = frozen_requirements
 
     def get_frozen_package_spec(self, requirement_line):
+        # imported here so that it's only needed in packaging time
+        import yarg
         req = Requirement.parse(requirement_line)
         yarg_kw = {}
         if self.pypi_server is not None:
