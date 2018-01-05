@@ -35,10 +35,6 @@ class SetupModifier(object):
         return setuptools.setup(**kwargs)
 
     def _modify_setup_kwargs(self, kwargs):
-        self.cmd_opt_setdefault(kwargs, 'prepare_manifest_in', 'extra_lines', []).extend([
-            BundleIncorporatedZip.REQUIRED_MANIFEST_LINE,
-        ])
-
         if kwargs.pop('version', None) is not None and self.version_module_paths:
             raise ValueError("when specifying version modules, you must not also specify hard-coded `version` in setup")
         if kwargs.pop('version', None) is None and not self.version_module_paths:
@@ -83,12 +79,12 @@ class SetupModifier(object):
             orig_script_args = kwargs.pop('script_args', sys.argv[1:])
             script_args = []
             script_args += [CleanEggInfo.SHORTNAME]
-            script_args += [PrepareManifestIn.SHORTNAME]
             script_args += [BundleIncorporatedZip.SHORTNAME]
             if self.version_module_paths:
                 script_args += [VersionSetByGit.SHORTNAME]
             if self.module_level_scripts:
                 script_args += [CreateScriptHooks.SHORTNAME, CreateScriptHooks.SHORTNAME]
+            script_args += [PrepareManifestIn.SHORTNAME]
             script_args += orig_script_args
             script_args += [UndoVirtualFiles.SHORTNAME]
             kwargs['script_args'] = script_args

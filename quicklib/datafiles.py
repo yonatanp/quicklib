@@ -89,6 +89,7 @@ class PrepareManifestIn(Command):
     ]
 
     def initialize_options(self):
+        self.rewriter = ManifestInRewriter()
         self.extra_lines = []
 
     def finalize_options(self):
@@ -96,7 +97,6 @@ class PrepareManifestIn(Command):
             self.extra_lines = self.extra_lines.split(",")
 
     def run(self):
-        rewriter = ManifestInRewriter()
         for line in self.extra_lines:
-            rewriter.add_line(line)
-        rewriter.rewrite()
+            self.rewriter.add_line(line)
+        self.rewriter.rewrite()

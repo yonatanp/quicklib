@@ -11,6 +11,7 @@ import quicklib
 import quicklib.version
 from .versioning import DEV_VERSION
 from .virtualfiles import register_for_removal
+from .datafiles import PrepareManifestIn
 
 QL_INCORPORATED = 'quicklib_incorporated'
 QL_INCORPORATED_ZIP = QL_INCORPORATED + '.zip'
@@ -70,8 +71,6 @@ def create_bootstrap_block():
 class BundleIncorporatedZip(Command):
     SHORTNAME = "bundle_incorporated_zip"
 
-    REQUIRED_MANIFEST_LINE = "include %s.v*.zip" % QL_INCORPORATED
-
     user_options = []
 
     def initialize_options(self):
@@ -88,16 +87,13 @@ class BundleIncorporatedZip(Command):
                             os.path.dirname(os.path.abspath(quicklib.__file__)))
         zip_path = pkg_resources.resource_filename('quicklib', QL_INCORPORATED_ZIP)
         bundled_zip_name = "%s.v%s.zip" % (QL_INCORPORATED, version)
-        log.info("bundling %s as %s (make sure your MANIFEST.in contains %s)" % (
-            zip_path, bundled_zip_name, self.REQUIRED_MANIFEST_LINE))
-        if not os.path.exists("MANIFEST.in"):
-            raise Exception("MANIFEST.in not found, aborting, quicklib will not be bundled without one!")
-        if self.REQUIRED_MANIFEST_LINE not in map(str.strip, open("MANIFEST.in", "r").readlines()):
-            # we'd rather raise here than risk users being stuck on this elusive point and missing a warning line
-            raise Exception("MANIFEST.in does not contain the line '%s', you're probably creating a broken build!" %
-                            self.REQUIRED_MANIFEST_LINE)
+        log.info("bundling %s as %s" % (
+            zip_path, bundled_zip_name))
         shutil.copy(zip_path, bundled_zip_name)
         register_for_removal(bundled_zip_name)
+        # add to MANIFEST.in
+        pmi = self.distribution.get_command_obj(PrepareManifestIn.SHORTNAME)
+        pmi.rewriter.add_include(bundled_zip_name)
 
 
 # this tells the library whether it's using a fresh (source tree) or incorporated (zip) quicklib
