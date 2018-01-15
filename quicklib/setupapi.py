@@ -167,8 +167,6 @@ class SdistReplacement(setuptools_sdist):
         if self.template is not None and self.template.lower() != "manifest.in":
             files = [f for f in files if f.lower() != "manifest.in"]
             self.copy_file(self.template, os.path.join(base_dir, "MANIFEST.in"))
-        from pprint import pprint
-        pprint(files)
         return setuptools_sdist.make_release_tree(self, base_dir, files)
 
 
@@ -180,7 +178,7 @@ class EggInfoReplacement(setuptools_egg_info):
         manifest_filename = os.path.join(self.egg_info, "SOURCES.txt")
         mm = manifest_maker(self.distribution)
         mm.manifest = manifest_filename
-        # this line is our modification
+        # this line is our modification - the rest remains unchanged
         mm.template = self.get_finalized_command('sdist').template
         mm.run()
         self.filelist = mm.filelist
