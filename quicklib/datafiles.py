@@ -3,16 +3,23 @@ import os
 import textwrap
 
 from setuptools import Command
+from distutils import log
 
 from .virtualfiles import modify_file, put_file
 
 
 class ManifestInRewriter(object):
-    def __init__(self, path="MANIFEST.in", append=True):
+    def __init__(self, path=None, append=True):
         self.path = path
         self.append = append
         self.lines = []
         self.rewritten = False
+
+    def set_path(self, path):
+        # this allows us to delay moment of path selection to just before rewrite
+        if self.rewritten:
+            raise Exception("cannot set path: %s has already been rewritten" % (self.path,))
+        self.path = path
 
     def add_line(self, line_text):
         if self.rewritten:
@@ -97,6 +104,9 @@ class PrepareManifestIn(Command):
             self.extra_lines = self.extra_lines.split(",")
 
     def run(self):
+        template = self.get_finalized_command('sdist').template or "MANIFEST.in"
+        self.rewriter.set_path(template)
+        log.info("rewriting %s" % self.rewriter.path)
         for line in self.extra_lines:
             self.rewriter.add_line(line)
         self.rewriter.rewrite()

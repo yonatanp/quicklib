@@ -1,0 +1,2 @@
+# this gets taken when building setup_examplelibrary_2a
+# if you add any files - they will be used instead of anything in MANIFEST.in (if exists)

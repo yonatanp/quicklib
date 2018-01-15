@@ -92,7 +92,7 @@ class BundleIncorporatedZip(Command):
         shutil.copy(zip_path, bundled_zip_name)
         register_for_removal(bundled_zip_name)
         # add to MANIFEST.in
-        pmi = self.distribution.get_command_obj(PrepareManifestIn.SHORTNAME)
+        pmi = self.get_finalized_command(PrepareManifestIn.SHORTNAME)
         pmi.rewriter.add_include(bundled_zip_name)
 
 

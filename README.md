@@ -14,7 +14,7 @@ Or clone this project's [repo](https://github.com/yonatanp/quicklib) and run:
 
 ## Creating libraries
 
-**TL;DR** - run `python -m quicklib.bootstrap` in a new folder and answer some questions, and you're good to go coding. Look at [examplelibrary](examplelibrary/) for an example created with this bootstrap process.
+**TL;DR** - run `python -m quicklib.bootstrap` in a new folder and answer some questions, and you're good to go coding. Look at [examplelibrary](examples/examplelibrary/) for an example created with this bootstrap process.
 
 Also, your library needs to be in a git-managed folder, and needs at least one numeric `major.minor` tag in your current history.
 
@@ -49,13 +49,13 @@ For a deeper dive into recommended structure and other possible options, check o
 
 ### Setup script
 
-For an example `setup.py` file see [examplelibrary's setup.py](examplelibrary/setup.py).
+For an example `setup.py` file see [examplelibrary's setup.py](examples/examplelibrary/setup.py).
 
 The setup script must include this fixed stub copy-pasted verbatim:
 ````Python
 # -------- quicklib direct/bundled import, copy pasted --------------------------------------------
-import sys as _sys, glob as _glob
-is_packaging = not os.path.exists("PKG-INFO")
+import sys as _sys, glob as _glob, os as _os
+is_packaging = not _os.path.exists("PKG-INFO")
 if is_packaging:
     import quicklib
 else:
@@ -97,6 +97,26 @@ Additional parameters:
 
 Modified parameter defaults:
 * if `packages` is not given, `find_packages()` is used automatically to discover packages under your library's top directory.
+
+### Setup script in non-standard location
+
+It is possible to build libraries with quicklib from setup scripts other than "top level setup.py".
+This allows building more than one library (or variants of a single library) from a single repository.
+
+Look at [examplelibrary2](examples/examplelibrary2/) for two such example library variants built from the same sources.
+
+Just place your setup code in any folder and run it the same way as usual, e.g.:
+
+    python my_other_setup.py sdist bdist_wheel
+    
+Note that if you want to have a `MANIFEST.in` file to go with the script, you can put it alongside it and using the same base name, e.g.:
+
+    ...
+    |-- my_other_setup.py
+    |-- my_other_setup.MANIFEST.in
+    ...
+    
+If no such alternative MANIFEST.in file is present and a top-level MANIFEST.in exists, it will be used as usual.
 
 ### Versioning
 

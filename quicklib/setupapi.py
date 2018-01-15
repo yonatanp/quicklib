@@ -2,6 +2,8 @@ import os
 import sys
 
 import setuptools
+from setuptools.command.sdist import sdist as setuptools_sdist
+from setuptools.command.egg_info import manifest_maker, egg_info as setuptools_egg_info
 
 from .utils import is_packaging
 from .versioning import read_module_version
@@ -29,8 +31,6 @@ class SetupModifier(object):
         self.freeze_requirements = flag_value
 
     def set_version_modules(self, module_paths):
-        if not all(os.path.isfile(p) for p in module_paths):
-            raise ValueError("invalid module_paths: all must be existing script files (module_paths=%s)" % (module_paths,))
         self.version_module_paths = list(module_paths)
 
     def set_module_level_scripts(self, script_names_to_module_names):
@@ -41,13 +41,20 @@ class SetupModifier(object):
         return setuptools.setup(**kwargs)
 
     def _modify_setup_kwargs(self, kwargs):
+        script_file = sys.argv[0]
+        if sys.argv[0].lower() != "setup.py":
+            matching_manifest_template = os.path.splitext(script_file)[0] + ".MANIFEST.in"
+            if os.path.exists(matching_manifest_template):
+                self.cmd_opt_setdefault(kwargs, 'sdist', 'template', matching_manifest_template)
+
         if kwargs.pop('version', None) is not None and self.version_module_paths:
             raise ValueError("when specifying version modules, you must not also specify hard-coded `version` in setup")
         if kwargs.pop('version', None) is None and not self.version_module_paths:
             raise ValueError("you must either specify version modules or give a hard-coded `version` in setup")
         if self.version_module_paths:
             if is_packaging():
-                kwargs['version'] = "ignored; replaced later by SetVersion command"
+                # ignored, replaced later by the SetVersion command
+                kwargs['version'] = "0.0.0"
                 self.cmd_opt_setdefault(kwargs, 'version_set_by_git', 'version_module_paths', self.version_module_paths)
             else:
                 kwargs['version'] = read_module_version(self.version_module_paths[0])
@@ -59,11 +66,11 @@ class SetupModifier(object):
                 .setdefault('console_scripts', []) \
                 .extend([
                     "%(script_name)s=%(hook_module)s:%(func_name)s" % dict(
-                        script_name=script_name,
+                        script_name=script_file,
                         hook_module=hook_module,
                         func_name=func_name,
                     )
-                    for (script_name, (_, hook_module, func_name)) in zip(
+                    for (script_file, (_, hook_module, func_name)) in zip(
                         self.module_level_scripts.keys(),
                         CreateScriptHooks.target_module_names_to_hook_module_and_func_name(self.module_level_scripts.values())
                     )
@@ -107,6 +114,8 @@ class SetupModifier(object):
                 CleanEggInfo, ExportMetadata, VersionSetByGit, BundleIncorporatedZip, CreateScriptHooks,
                 UndoVirtualFiles, PrepareManifestIn, UseRequirementsTxtCommand, FreezeRequirementsCommand,
                 DynamicRequirementsCommand,
+                # --
+                SdistReplacement, EggInfoReplacement,
             ]
         }
 
@@ -143,3 +152,35 @@ def setup(**kwargs):
         except Exception as exc:
             print "ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc
         raise
+
+
+class SdistReplacement(setuptools_sdist):
+    SHORTNAME = "sdist"
+
+    def make_release_tree(self, base_dir, files):
+        self.mkpath(base_dir)
+        # alternative script locations are made possible
+        script_file = sys.argv[0]
+        if script_file.lower() != "setup.py":
+            files = [f for f in files if f.lower() != "setup.py"]
+            self.copy_file(script_file, os.path.join(base_dir, "setup.py"))
+        if self.template is not None and self.template.lower() != "manifest.in":
+            files = [f for f in files if f.lower() != "manifest.in"]
+            self.copy_file(self.template, os.path.join(base_dir, "MANIFEST.in"))
+        from pprint import pprint
+        pprint(files)
+        return setuptools_sdist.make_release_tree(self, base_dir, files)
+
+
+class EggInfoReplacement(setuptools_egg_info):
+    SHORTNAME = "egg_info"
+
+    def find_sources(self):
+        """Generate SOURCES.txt manifest file"""
+        manifest_filename = os.path.join(self.egg_info, "SOURCES.txt")
+        mm = manifest_maker(self.distribution)
+        mm.manifest = manifest_filename
+        # this line is our modification
+        mm.template = self.get_finalized_command('sdist').template
+        mm.run()
+        self.filelist = mm.filelist

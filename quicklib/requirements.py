@@ -26,7 +26,7 @@ class DynamicRequirementsCommand(Command):
         pass
 
     def run_packaging(self):
-        pmi = self.distribution.get_command_obj(PrepareManifestIn.SHORTNAME)
+        pmi = self.get_finalized_command(PrepareManifestIn.SHORTNAME)
         pmi.rewriter.add_include(self.persistent_filename)
         log.info("persisting dynamic install_requires: %s" % (self.distribution.install_requires,))
         put_file(self.persistent_filename, "\n".join(self.distribution.install_requires))

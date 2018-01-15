@@ -6,6 +6,7 @@ import textwrap
 from setuptools import Command
 from distutils import log
 
+from quicklib.virtualfiles import put_file
 from .virtualfiles import modify_file
 
 DEV_VERSION = "0.0.0.dev0"
@@ -13,15 +14,30 @@ DEV_VERSION = "0.0.0.dev0"
 RE_VERSION_CODE_LINE = re.compile("^__version__ *= *.*$", re.MULTILINE)
 
 
-def create_version_block():
+def create_version_block(version_value_repr="DEV_VERSION"):
     return textwrap.dedent("""
         # quicklib version boilerplate
         DEV_VERSION = "%(DEV_VERSION)s"
-        __version__ = DEV_VERSION
-        """ % dict(DEV_VERSION=DEV_VERSION))[1:-1]
+        __version__ = %(version_value_repr)s
+        """ % dict(
+            DEV_VERSION=DEV_VERSION,
+            version_value_repr=version_value_repr,
+        ))[1:-1]
+
+
+def normalize_version_module_path(version_module_path):
+    if os.path.isdir(version_module_path):
+        version_module_path = os.path.join(version_module_path, "__version__.py")
+    root, ext = os.path.splitext(version_module_path)
+    if ext.lower() in (".pyo", ".pyc"):
+        ext = ".py"
+    if ext != ".py":
+        raise ValueError("invalid version module path: %s" % version_module_path)
+    return root + ext
 
 
 def read_module_version(version_module_path):
+    version_module_path = normalize_version_module_path(version_module_path)
     version_load_vars = {}
     execfile(version_module_path, version_load_vars)
     return version_load_vars['__version__']
@@ -57,25 +73,29 @@ class VersionSetCommandBase(Command):
         self.distribution.metadata.version = self.version
         # set versions for all modules needed
         for version_module_path in self.version_module_paths:
-            self._virtual_replace_module_version(version_module_path, self.version)
+            version_module_path = normalize_version_module_path(version_module_path)
+            self._virtual_set_module_version(version_module_path, self.version)
 
     @classmethod
-    def _virtual_replace_module_version(cls, module_path, new_version):
+    def _virtual_set_module_version(cls, module_path, version):
         """
-        Edits the source file on disk and changes any `__version__ = ...` code line to use `new_version`.
+        create or modify (virtually) the module at the given path to have a `__version__ = [version]` code line.
         """
         if not isinstance(module_path, basestring):
             raise TypeError("expected string module path, got %r" % (module_path,))
         if not os.path.splitext(module_path)[1].lower() == ".py":
             raise ValueError("expected module path of a python source (.py) file, got %s" % (module_path,))
-        version_module_code = open(module_path, "rb").read()
-        if not re.search(RE_VERSION_CODE_LINE, version_module_code):
-            raise Exception("no version line (matching %s) found in %s, unable to replace module version" % (
-                RE_VERSION_CODE_LINE, module_path,
-            ))
-        # set any version line to the given specific string version (virtual - for package only)
-        modified_code = re.sub(RE_VERSION_CODE_LINE, "__version__ = '%s'" % new_version, version_module_code)
-        modify_file(module_path, modified_code, binary=True)
+        if os.path.exists(module_path):
+            version_module_code = open(module_path, "rb").read()
+            if not re.search(RE_VERSION_CODE_LINE, version_module_code):
+                raise Exception("no version line (matching %s) found in %s, unable to replace module version" % (
+                    RE_VERSION_CODE_LINE, module_path,
+                ))
+            # set any version line to the given specific string version (virtual - for package only)
+            modified_code = re.sub(RE_VERSION_CODE_LINE, "__version__ = '%s'" % version, version_module_code)
+            modify_file(module_path, modified_code, binary=True)
+        else:
+            put_file(module_path, create_version_block(repr(version)))
 
 
 class GitVersionCalculator(object):

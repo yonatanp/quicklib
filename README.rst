@@ -73,8 +73,8 @@ The setup script must include this fixed stub copy-pasted verbatim:
 .. code:: Python
 
     # -------- quicklib direct/bundled import, copy pasted --------------------------------------------
-    import sys as _sys, glob as _glob
-    is_packaging = not os.path.exists("PKG-INFO")
+    import sys as _sys, glob as _glob, os as _os
+    is_packaging = not _os.path.exists("PKG-INFO")
     if is_packaging:
         import quicklib
     else:
@@ -121,6 +121,37 @@ Modified parameter defaults:
 -  if ``packages`` is not given, ``find_packages()`` is used
    automatically to discover packages under your library's top
    directory.
+
+Setup script in non-standard location
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is possible to build libraries with quicklib from setup scripts
+other than "top level setup.py". This allows building more than one
+library (or variants of a single library) from a single repository.
+
+Look at `examplelibrary2`_ for two such example library variants built
+from the same sources.
+
+Just place your setup code in any folder and run it the same way as
+usual, e.g.:
+
+::
+
+    python my_other_setup.py sdist bdist_wheel
+
+Note that if you want to have a ``MANIFEST.in`` file to go with the
+script, you can put it alongside it and using the same base name,
+e.g.:
+
+::
+
+    ...
+    |-- my_other_setup.py
+    |-- my_other_setup.MANIFEST.in
+    ...
+
+If no such alternative MANIFEST.in file is present and a top-level
+MANIFEST.in exists, it will be used as usual.
 
 Versioning
 ~~~~~~~~~~
@@ -220,6 +251,7 @@ requirements as your own requirements. Automatically fetching this
 information is on this library’s roadmap.
 
 .. _repo: https://github.com/yonatanp/quicklib
-.. _examplelibrary: https://github.com/yonatanp/quicklib/tree/master/examplelibrary/
+.. _examplelibrary: https://github.com/yonatanp/quicklib/tree/master/examples/examplelibrary/
+.. _examplelibrary2: https://github.com/yonatanp/quicklib/tree/master/examples/examplelibrary2/
 .. _Structuring Your Project: http://docs.python-guide.org/en/latest/writing/structure/
-.. _examplelibrary's setup.py: https://github.com/yonatanp/quicklib/tree/master/examplelibrary/setup.py
+.. _examplelibrary's setup.py: https://github.com/yonatanp/quicklib/tree/master/examples/examplelibrary/setup.py

@@ -1,9 +1,6 @@
-import os
-
-
 # -------- quicklib direct/bundled import, copy pasted --------------------------------------------
-import sys as _sys, glob as _glob
-is_packaging = not os.path.exists("PKG-INFO")
+import sys as _sys, glob as _glob, os as _os
+is_packaging = not _os.path.exists("PKG-INFO")
 if is_packaging:
     import quicklib
 else:
@@ -15,11 +12,11 @@ else:
 
 
 quicklib.setup(
-    name='examplelibrary',
+    name='examplelibrary_2b',
     url="https://example.com/",
     author='ACME Inc.',
     author_email='user@example.com',
-    description='examplelibrary: a library to demonstrate how quicklib is used to quickly setup python libraries',
+    description='examplelibrary (2b): a partial-content library built from non-default setup script in sub-directory',
     license='Copyright ACME Inc.',
     platforms='any',
     classifiers=[
@@ -30,11 +27,14 @@ quicklib.setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    freeze_requirements=True,
+    packages=[
+        'examplepackage2',
+        'b_only',
+    ],
     version_module_paths=[
-        os.path.join(os.path.dirname(__file__), "examplepackage", "version.py"),
+        "examplepackage2",
     ],
     module_level_scripts={
-        'examplescript': 'examplepackage.examplescript',
+        'examplescript2b': 'examplepackage2.examplemodule2',
     },
 )
