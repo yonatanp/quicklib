@@ -106,7 +106,7 @@ After that, where you would usually call ``setuptools.setup(...)``, call
             'Topic :: Software Development :: Libraries :: Python Modules',
         ],
         version_module_paths=[
-            os.path.join(os.path.dirname(__file__), "examplepackage", "version.py"),
+            "examplepackage/version.py",
         ],
     )
 
@@ -193,10 +193,8 @@ In addition, tell ``setup.py`` where to find those files:
 
         quicklib.setup(
             version_module_paths=[
-                os.path.join(os.path.dirname(__file__), "mypackage", "version.py"),
-                # ...
+                "mypackage/version.py",
                 # ... you can specify more than one
-                # ...
             ],
         )
 
