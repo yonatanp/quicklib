@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 from setuptools import Command
 from distutils import log
@@ -93,7 +94,11 @@ class FreezeRequirementsCommand(Command):
 
     def get_frozen_package_spec(self, requirement_line):
         req = Requirement.parse(requirement_line)
-        available_versions = self.server_plugin.get_ordered_package_versions(req.name, self.pypi_server)
+        try:
+            available_versions = self.server_plugin.get_ordered_package_versions(req.name, self.pypi_server)
+        except Exception:
+            log.error("freeze requirements: failed fetching available versions for %s" % req.name)
+            raise
         if not available_versions:
             raise Exception("no versions found for package %s" % req.name)
         matching_versions = [v for v in available_versions if v in req]
@@ -130,8 +135,9 @@ class UseRequirementsTxtCommand(Command):
 
     def finalize_options(self):
         if self.requirements_txt is None:
-            if os.path.exists("requirements.txt"):
-                self.requirements_txt = ["requirements.txt"]
+            default_requirements_txt = os.path.join(os.path.dirname(sys.argv[0]), "requirements.txt")
+            if os.path.exists(default_requirements_txt):
+                self.requirements_txt = [default_requirements_txt]
             else:
                 self.requirements_txt = []
         elif isinstance(self.requirements_txt, basestring):
