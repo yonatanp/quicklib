@@ -21,14 +21,23 @@ class SetupModifier(object):
         self.auto_find_packages = auto_find_packages
         self.use_requirements_txt = True
         self.freeze_requirements = False
+        self.freeze_requirements_params = {}
         self.version_module_paths = []
         self.module_level_scripts = {}
 
     def set_use_requirements_txt(self, flag_value):
         self.use_requirements_txt = flag_value
 
-    def set_freeze_requirements(self, flag_value):
-        self.freeze_requirements = flag_value
+    def set_freeze_requirements(self, value):
+        if not value:
+            self.freeze_requirements = False
+            self.freeze_requirements_params = {}
+        elif value is True:
+            self.freeze_requirements = True
+            self.freeze_requirements_params = {}
+        else:
+            self.freeze_requirements = True
+            self.freeze_requirements_params = dict(value)
 
     def set_version_modules(self, module_paths):
         self.version_module_paths = list(module_paths)
@@ -46,6 +55,12 @@ class SetupModifier(object):
             matching_manifest_template = os.path.splitext(script_file)[0] + ".MANIFEST.in"
             if os.path.exists(matching_manifest_template):
                 self.cmd_opt_setdefault(kwargs, 'sdist', 'template', matching_manifest_template)
+
+        if self.freeze_requirements:
+            for key in ("pypi_server", "server_plugin"):
+                if key in self.freeze_requirements_params:
+                    self.cmd_opt_setdefault(kwargs, FreezeRequirementsCommand.SHORTNAME, key,
+                                            self.freeze_requirements_params[key])
 
         if kwargs.pop('version', None) is not None and self.version_module_paths:
             raise ValueError("when specifying version modules, you must not also specify hard-coded `version` in setup")

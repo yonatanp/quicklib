@@ -176,6 +176,25 @@ Use syntax such as:
 
 Sometimes you want to hardcode the versions of your dependencies. This helps provide your users the exact same configuration you built and tested with. To avoid having to manually update those numbers, you can keep your requirements specified as usual but activate "requirement freezing".
 
-Do this by passing `freeze_requirements=True` to the `quicklib.setup(...)` call in `setup.py`.
+Do this by passing `freeze_requirements=True` to the `quicklib.setup(...)` call in `setup.py`. At packaging time, the available versions will be retrieved from `pypi.python.org`, and the latest matching version will be hardcoded as the requirement.
 
 Note: if your library depends on a hardcoded `dep==1.0` but `dep` did not hardcode its dependencies, your users might get different packages. To get around that you can specify your requirements' requirements as your own requirements. Automatically fetching this information is on this library's roadmap.
+
+#### when not using pypi.python.org
+
+If your dependency libraries come from another package repository, you can specify another address or even provide your own plugin to retrieve information from such a server.
+
+To do this, provide a dictionary of options in `freeze_requirements`:
+
+```Python
+    quicklib.setup(
+        # ...
+        freeze_requirements = {
+            # alternative pypi server address
+            'pypi_server': 'https://my-private-pypi.com/packages/',
+            # when given, this is imported at packaging time and used to find package versions.
+            # see quicklib/requirements.py for the StandardPypiServerPlugin default plugin, and follow its interface.
+            'server_plugin': 'foo.bar:baz()',
+        }
+    )
+```

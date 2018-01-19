@@ -1,4 +1,5 @@
 import os
+import re
 
 from setuptools import Command
 from distutils import log
@@ -49,14 +50,39 @@ class FreezeRequirementsCommand(Command):
 
     user_options = [
         ("pypi-server=", None,
-         "alternative pypi server")
+         "alternative pypi server (when using a plugin, arbitrary data can be passed, depending on the plugin)"),
+        ("server-plugin=", None,
+         "external plugin for accessing pypi server and recovering package data"),
     ]
 
     def initialize_options(self):
         self.pypi_server = None
+        self.server_plugin = 'quicklib.requirements:StandardPypiServerPlugin'
 
     def finalize_options(self):
-        pass
+        # giving a string spec for the external plugin helps when it depends on a package available only when packaging
+        if isinstance(self.server_plugin, basestring):
+            self.server_plugin = self._load_plugin_from_spec()
+
+    PLUGIN_IMPORT_SPEC = "^([0-9a-zA-Z.]+)(?::([0-9a-zA-Z]+)(\\(\\))?)?$"
+
+    def _load_plugin_from_spec(self):
+        # import the module or the name from the module, and init if parentheses are given
+        m = re.match(self.PLUGIN_IMPORT_SPEC, self.server_plugin)
+        if not m:
+            raise ValueError("invalid plugin import spec given: %s" % self.server_plugin)
+        log.info("loading requirements plugin from %s" % self.server_plugin)
+        module_name, member_name, should_invoke = m.groups()
+        exec_globals = {}
+        import_command = (
+            "from %s import %s as plugin" % (module_name, member_name) if member_name else
+            "import %s as plugin" % module_name
+        )
+        exec (import_command, exec_globals)
+        plugin = exec_globals['plugin']
+        if should_invoke:
+            plugin = plugin()
+        return plugin
 
     def run(self):
         frozen_requirements = [
@@ -66,13 +92,8 @@ class FreezeRequirementsCommand(Command):
         self.distribution.install_requires = frozen_requirements
 
     def get_frozen_package_spec(self, requirement_line):
-        # imported here so that it's only needed in packaging time
-        import yarg
         req = Requirement.parse(requirement_line)
-        yarg_kw = {}
-        if self.pypi_server is not None:
-            yarg_kw['pypi_server'] = self.pypi_server
-        available_versions = yarg.get(req.name, **yarg_kw).release_ids
+        available_versions = self.server_plugin.get_ordered_package_versions(req.name, self.pypi_server)
         if not available_versions:
             raise Exception("no versions found for package %s" % req.name)
         matching_versions = [v for v in available_versions if v in req]
@@ -80,6 +101,18 @@ class FreezeRequirementsCommand(Command):
             raise Exception("no versions found for package %s matching %s" % (req.name, requirement_line))
         latest_version = matching_versions[-1]
         return "%s==%s" % (req.name, latest_version)
+
+
+class StandardPypiServerPlugin(object):
+    @staticmethod
+    def get_ordered_package_versions(package_name, pypi_server=None):
+        # imported here so that it's only needed in packaging time
+        import yarg
+        yarg_kw = {}
+        if pypi_server is not None:
+            yarg_kw['pypi_server'] = pypi_server
+        available_versions = yarg.get(package_name, **yarg_kw).release_ids
+        return available_versions
 
 
 class UseRequirementsTxtCommand(Command):
