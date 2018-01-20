@@ -53,8 +53,8 @@ class CreateIncorporatedZip(Command):
 def create_bootstrap_block():
     return textwrap.dedent("""
         # -------- quicklib direct/bundled import, copy pasted --------------------------------------------
-        import sys as _sys, glob as _glob
-        is_packaging = not os.path.exists("PKG-INFO")
+        import sys as _sys, glob as _glob, os as _os
+        is_packaging = not _os.path.exists("PKG-INFO")
         if is_packaging:
             import quicklib
         else:

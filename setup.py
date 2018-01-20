@@ -43,7 +43,8 @@ setup(
     long_description=long_description,
     license='MIT',
     install_requires=[
-        'yarg==0.1.9',
+        'yarg~=0.1.9',
+        'PyYAML~=3.12',
     ],
     tests_require=[],
     packages=find_packages(),
@@ -66,5 +67,10 @@ setup(
     script_args=script_args,
     command_options={
         'version_set_by_git': {'version_module_paths': ('setup.py', version_module_path)},
-    }
+    },
+    entry_points={
+        'console_scripts': [
+            'quicklib-setup = quicklib.quicklibsetup:main',
+        ],
+    },
 )

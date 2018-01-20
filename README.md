@@ -34,7 +34,9 @@ The recommended library file structure is something like:
 
 ````
 mylibrary/
-  |-- setup.py
+  |----- setup.py
+  |  | OR
+  |  --- quicklib_setup.yml
   |-- README.md
   |-- [requirements.txt]
   mypackage/
@@ -101,6 +103,23 @@ Additional parameters:
 
 Modified parameter defaults:
 * if `packages` is not given, `find_packages()` is used automatically to discover packages under your library's top directory.
+
+### YAML-based setup
+
+The easiest way for simple libraries is to provide all necessary details in a YAML file. This is essentially the same as creating a setup.py that uses the YAML dictionary as its kwargs.
+
+For example, create a `quicklib_setup.yml` file at the root of your project:
+
+    setup:
+      name: mylibrary
+      description: a library for doing some stuff
+      version: 1.0
+
+And run `quicklib-setup sdist` (instead of `python setup.py sdist`) to create the library package.
+
+For additional parameters, see the rest of this documentation and provide parameters to `quicklib.setup(...)` as values under the `setup` dictionary in your `quicklib_setup.yml` file.
+
+Take a look at the [minimal example library](examples/minimal/) for usage example.
 
 ### Setup script in non-standard location
 

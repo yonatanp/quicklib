@@ -40,6 +40,8 @@ class SetupModifier(object):
             self.freeze_requirements_params = dict(value)
 
     def set_version_modules(self, module_paths):
+        if isinstance(module_paths, basestring):
+            module_paths = [module_paths]
         self.version_module_paths = list(module_paths)
 
     def set_module_level_scripts(self, script_names_to_module_names):
@@ -62,9 +64,9 @@ class SetupModifier(object):
                     self.cmd_opt_setdefault(kwargs, FreezeRequirementsCommand.SHORTNAME, key,
                                             self.freeze_requirements_params[key])
 
-        if kwargs.pop('version', None) is not None and self.version_module_paths:
+        if kwargs.get('version', None) is not None and self.version_module_paths:
             raise ValueError("when specifying version modules, you must not also specify hard-coded `version` in setup")
-        if kwargs.pop('version', None) is None and not self.version_module_paths:
+        if kwargs.get('version', None) is None and not self.version_module_paths:
             raise ValueError("you must either specify version modules or give a hard-coded `version` in setup")
         if self.version_module_paths:
             if is_packaging():

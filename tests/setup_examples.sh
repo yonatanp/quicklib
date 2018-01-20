@@ -4,7 +4,7 @@ set -e
 cd $(dirname $0)/../examples
 
 pip_uninstall_examples() {
-    for pkg in examplelibrary examplelibrary_2a examplelibrary_2b; do
+    for pkg in examplelibrary examplelibrary_2a examplelibrary_2b minimal; do
         pip uninstall -y $pkg || true
     done
 }
@@ -42,5 +42,17 @@ pip install dist/examplelibrary_2b-*.tar.gz
 pushd /tmp
 python -c 'import examplepackage2; print examplepackage2'
 examplescript2b | grep "we are in '2b' variant"
+popd
+cd ..
+
+# minimal (using quicklib-setup)
+cd minimal
+rm -rf build dist
+pip_uninstall_examples
+quicklib-setup sdist
+pip install dist/minimal-*.tar.gz
+pushd /tmp
+python -c 'import minimalpkg.__version__; print "minimalpkg version:", minimalpkg.__version__.__version__'
+how-minimal | grep "so minimal"
 popd
 cd ..

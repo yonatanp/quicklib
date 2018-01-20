@@ -1,0 +1,7 @@
+setup:
+  name: minimal
+  description: example for a minimal library with just a bit of functionality and very little setup boilerplate
+  version_module_paths: minimalpkg
+  entry_points:
+    console_scripts:
+      - how-minimal = minimalpkg:how_minimal
