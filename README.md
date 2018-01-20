@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/yonatanp/quicklib.svg?branch=feature-travis-testing)](https://travis-ci.org/yonatanp/quicklib)
 [![PyPI](https://img.shields.io/pypi/v/quicklib.svg)]()
-[![PyPI](https://img.shields.io/pypi/l/quicklib.svg)]()
+[![license](https://img.shields.io/github/license/yonatanp/quicklib.svg)]()
 
 Build hassle-free setup scripts for your python libraries, with practical versioning, requirements specification, and more (to come).
 
