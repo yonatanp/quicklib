@@ -2,10 +2,8 @@ sudo: false
 language: python
 python: 2.7
 
-install:
-  - pip install -e .
-
 script:
   - python setup.py sdist
   - python setup.py bdist_wheel
-
+  - python setup.py install
+  - tests/setup_examples.sh

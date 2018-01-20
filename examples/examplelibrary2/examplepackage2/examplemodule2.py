@@ -14,11 +14,11 @@ if __name__ == '__main__':
     # are we in a or b variant?
     try:
         import a_only
-        print "we are probably in '2a' variant"
+        print "we are in '2a' variant"
     except:
         pass
     try:
         import b_only
-        print "we are probably in '2b' variant"
+        print "we are in '2b' variant"
     except:
         pass
