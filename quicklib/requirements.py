@@ -65,7 +65,7 @@ class FreezeRequirementsCommand(Command):
         if isinstance(self.server_plugin, basestring):
             self.server_plugin = self._load_plugin_from_spec()
 
-    PLUGIN_IMPORT_SPEC = "^([0-9a-zA-Z.]+)(?::([0-9a-zA-Z]+)(\\(\\))?)?$"
+    PLUGIN_IMPORT_SPEC = "^([0-9a-zA-Z_.]+)(?::([0-9a-zA-Z_]+)(\\(\\))?)?$"
 
     def _load_plugin_from_spec(self):
         # import the module or the name from the module, and init if parentheses are given
