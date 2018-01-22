@@ -196,6 +196,12 @@ If your library contains multiple top-level packages, a `version.py` file should
 This allows your library users to ask about the version of each of your individual packages while being agnostic to the fact that they come from the same library.
 If you find this confusing, you may want to stick to one top-level package per library.
 
+### Choosing packages to include
+
+The default behavior calls `setuptools.find_packages()` and typically collects all top-level packages found. To disable this behavior, provide `packages` yourself.
+
+Another alternative is to provide a list of top-level package names in the `top_packages` argument. In this case, `find_packages()` is called when only these top-level packages are included in the search.
+
 ### Requirements
 
 To add requirements to your library, add them in a `requirements.txt` file at the project root.

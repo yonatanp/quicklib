@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 import setuptools
@@ -93,9 +94,24 @@ class SetupModifier(object):
                     )
                 ])
 
-        if self.auto_find_packages and 'packages' not in kwargs:
-            kwargs['packages'] = setuptools.find_packages()
-            print "note: packages auto-discovered:"
+        packages = kwargs.get('packages', [])
+        auto_discovered = False
+        if 'top_packages' in kwargs:
+            top_packages = kwargs.pop('top_packages')
+            if any(not re.match("^[a-zA-Z0-9_]+$", i) for i in top_packages):
+                raise ValueError("invalid top_packages %s - must be valid top_packages" % top_packages)
+            found_packages = setuptools.find_packages(include=[
+                "%s*" % p for p in top_packages
+            ])
+            packages.extend([p for p in found_packages if p not in packages])
+            auto_discovered = True
+        elif self.auto_find_packages:
+            found_packages = setuptools.find_packages()
+            packages.extend([p for p in found_packages if p not in packages])
+            auto_discovered = True
+        kwargs['packages'] = packages
+        if auto_discovered:
+            print "note: some packages auto-discovered:"
             for p in kwargs['packages']:
                 print "  - %s" % (p,)
 
