@@ -144,6 +144,21 @@ project:
 And run ``quicklib-setup sdist`` (instead of ``python setup.py sdist``)
 to create the library package.
 
+You can also ``include`` additional files of a similar format (overriding each other in order of appearance), e.g. to use as common template of values:
+
+::
+
+    # mylib_setup.yml
+    include:
+        - ../common_properties.yml
+    setup:
+        name: mylibrary
+
+    # common_properties.yml
+    setup:
+        author: ACME Inc.
+        author_email: user@example.com
+
 For additional parameters, see the rest of this documentation and
 provide parameters to ``quicklib.setup(...)`` as values under the
 ``setup`` dictionary in your ``quicklib_setup.yml`` file.
