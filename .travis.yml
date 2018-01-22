@@ -7,3 +7,12 @@ script:
   - python setup.py bdist_wheel
   - python setup.py install
   - tests/setup_examples.sh
+
+deploy:
+  provider: pypi
+  user: yonatanp
+  password:
+    secure: cLbO67APupW+aH3y5xi75fkZAa+C9FDQN4q3cSSym72bjw+lPNpIYBgjHHc3KxqfwPENtBtFZauwGiXCmhNKFEdMQMWQ/NwnvnJVMJh1m1dLoO5h7fF8fnWxmYmT1MhUIP/nrqJhFlcpOwl7qzRzra/Nb7wrTY21qvLNqJdl7+v9dj1nr+l+sL6Muw6nlqQWMP0gPXAhTJ3BuGoNSjZCHtxZymm5cRLkESLgzEjn6hZZSSpY2i2je22RpHd7NvM/Yn397p2F9IM3ftHTIg9ISnPdiyIwKH8j/6fg/hMhvnJ6FVivntPWKdAUPee6/fvDq0fk0M2LouAQ/FPyFliOplr/L9ooJ9EItW5Sdy6keHGy9zzxVQHvhfLYBaSzsFWciQuc6lDQqo+hvzArmCVyB3lK6ODkarzfh9gH+ybiBERs9sW9c0ffUME/cCVsWQp0S777TpBYvpx+zjQKFQBk2qCbDZI2XECvX+NT47EKjXGjTxcID5jCu1lQxBJ+wRw/2XkpsK4KA9YATL1+/ycd15a1HAsoKYpDcy3gSLh51QWoZuroArL1KATaMxGa+UBcKuJDJSen1bEYk3ECJrhUdmTkkbFWrMc2El9Pm/cdpE+/YPW7AbpBRqgpD1x4DM7W0M/hMqgVNepWEGIixll7/N7KSAK7WgUVskz4GFX66oI=
+  on:
+    branch: production
+  distributions: "sdist bdist_wheel"
