@@ -17,25 +17,40 @@ class DynamicRequirementsCommand(Command):
     description = "persist dynamically manipulated distribution install-requirements into a file during packaging"
 
     user_options = [
-        ("persistent-filename=", None,
-         "where calculated requirements are saved, and later loaded back")
+        ("filename-install-requires=", None,
+         "where calculated 'install_requires' values are saved, and later loaded back"),
+        ("filename-extras-require=", None,
+         "where calculated 'extras_require' values are saved, and later loaded back"),
     ]
 
     def initialize_options(self):
-        self.persistent_filename = "dynamic_requirements.txt"
+        self.filename_install_requires = "dynamic_install_requires.txt"
+        self.filename_extras_require = "dynamic_extras_require.txt"
 
     def finalize_options(self):
         pass
 
     def run_packaging(self):
         pmi = self.get_finalized_command(PrepareManifestIn.SHORTNAME)
-        pmi.rewriter.add_include(self.persistent_filename)
-        log.info("persisting dynamic install_requires: %s" % (self.distribution.install_requires,))
-        put_file(self.persistent_filename, "\n".join(self.distribution.install_requires))
+
+        pmi.rewriter.add_include(self.filename_install_requires)
+        dumped_install_requires = repr(self.distribution.install_requires)
+        log.info("persisting dynamic install_requires:\n%s" % dumped_install_requires)
+        put_file(self.filename_install_requires, dumped_install_requires)
+
+        pmi.rewriter.add_include(self.filename_extras_require)
+        dumped_extras_require = repr(self.distribution.extras_require)
+        log.info("persisting dynamic extras_require:\n%s" % dumped_extras_require)
+        put_file(self.filename_extras_require, dumped_extras_require)
 
     def run_deploying(self):
-        self.distribution.install_requires = open(self.persistent_filename, "r").read().split("\n")
-        log.info("loaded pre-persisted dynamic install_requires: %s" % (self.distribution.install_requires,))
+        loaded_install_requires = open(self.filename_install_requires, "r").read()
+        log.info("loaded pre-persisted dynamic install_requires:\n%s" % loaded_install_requires)
+        self.distribution.install_requires = eval(loaded_install_requires)
+
+        loaded_extras_require = open(self.filename_extras_require, "r").read()
+        log.info("loaded pre-persisted dynamic extras_require:\n%s" % loaded_extras_require)
+        self.distribution.extras_require = eval(loaded_extras_require)
 
     def run(self):
         if is_packaging():
@@ -91,6 +106,14 @@ class FreezeRequirementsCommand(Command):
             for item in self.distribution.install_requires
         ]
         self.distribution.install_requires = frozen_requirements
+        frozen_extras_require = {
+            extra_cond: [
+                self.get_frozen_package_spec(item)
+                for item in req_list
+            ]
+            for extra_cond, req_list in self.distribution.extras_require.iteritems()
+        }
+        self.distribution.extras_require = frozen_extras_require
 
     def get_frozen_package_spec(self, requirement_line):
         req = Requirement.parse(requirement_line)
@@ -105,7 +128,12 @@ class FreezeRequirementsCommand(Command):
         if not matching_versions:
             raise Exception("no versions found for package %s matching %s" % (req.name, requirement_line))
         latest_version = matching_versions[-1]
-        return "%s==%s" % (req.name, latest_version)
+        self.set_req_version_specifier(req, latest_version)
+        return str(req)
+
+    @staticmethod
+    def set_req_version_specifier(req, specific_version):
+        req.specifier = Requirement.parse("dummy==%s" % specific_version).specifier
 
 
 class StandardPypiServerPlugin(object):
