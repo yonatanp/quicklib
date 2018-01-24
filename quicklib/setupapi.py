@@ -103,6 +103,8 @@ class SetupModifier(object):
             found_packages = setuptools.find_packages(include=[
                 "%s*" % p for p in top_packages
             ])
+            # globbing "include pkg*" could bring unwanted pkg_other, so we filter specifically
+            found_packages = [p for p in found_packages if p.split(".")[0] in top_packages]
             packages.extend([p for p in found_packages if p not in packages])
             auto_discovered = True
         elif self.auto_find_packages:
@@ -111,9 +113,21 @@ class SetupModifier(object):
             auto_discovered = True
         kwargs['packages'] = packages
         if auto_discovered:
-            print "note: some packages auto-discovered:"
+            print "note: some packages auto-discovered, here are the final packages:"
             for p in kwargs['packages']:
                 print "  - %s" % (p,)
+
+        # this is silly and should always have been true by default.
+        # be explicit if you *don't* want package data (that's already been included in the manifest).
+        kwargs.setdefault('include_package_data', True)
+
+        if 'manifest' in kwargs:
+            lines = ['# from quicklib.setup(manifest=...)'] + list(kwargs.pop('manifest'))
+            self.cmd_opt_setdefault(kwargs, PrepareManifestIn.SHORTNAME, 'manifest_content', lines)
+
+        if 'manifest_extra' in kwargs:
+            lines = ['# from quicklib.setup(manifest_extra=...)'] + list(kwargs.pop('manifest_extra'))
+            self.cmd_opt_setdefault(kwargs, PrepareManifestIn.SHORTNAME, 'extra_lines', lines)
 
         kwargs.setdefault('cmdclass', {}).update(self.get_quicklib_commands())
 
@@ -178,12 +192,13 @@ def setup(**kwargs):
         sm.set_module_level_scripts(kwargs.pop('module_level_scripts'))
     try:
         return sm.setup(**kwargs)
-    except:
+    except Exception as exc1:
         try:
+            print "exception caught during setup call: %s" % (exc1,)
             print "quicklib.setup: emergency undoing of all virtual file changes"
             undo_virtual_files()
-        except Exception as exc:
-            print "ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc
+        except Exception as exc2:
+            print "ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc2
         raise
 
 

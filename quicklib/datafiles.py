@@ -21,6 +21,12 @@ class ManifestInRewriter(object):
             raise Exception("cannot set path: %s has already been rewritten" % (self.path,))
         self.path = path
 
+    def set_append(self, append):
+        # this allows us to delay moment of decision on append/replace to just before rewrite
+        if self.rewritten:
+            raise Exception("cannot set append: %s has already been rewritten" % (self.path,))
+        self.append = append
+
     def add_line(self, line_text):
         if self.rewritten:
             raise Exception("cannot add lines: %s has already been rewritten" % (self.path,))
@@ -65,6 +71,9 @@ class ManifestInRewriter(object):
     def add_graft(self, directory):
         self.add_line("graft %s" % directory)
 
+    def prepend_lines(self, lines):
+        self.lines = list(lines) + self.lines
+
     def rewrite(self):
         if self.rewritten:
             raise Exception("cannot rewrite: %s has already been rewritten" % (self.path,))
@@ -91,22 +100,30 @@ class PrepareManifestIn(Command):
     SHORTNAME = "prepare_manifest_in"
 
     user_options = [
+        ("manifest-content", None,
+         "use these lines as MANIFEST.in (virtually created/replaced); extra-lines, if given, are added"),
         ("extra-lines=", None,
          "extra lines to add to the MANIFEST.in file (list or comma-separated string)")
     ]
 
     def initialize_options(self):
         self.rewriter = ManifestInRewriter()
+        self.manifest_content = None
         self.extra_lines = []
 
     def finalize_options(self):
+        if isinstance(self.manifest_content, basestring):
+            self.manifest_content = self.manifest_content.split("\n")
         if isinstance(self.extra_lines, basestring):
-            self.extra_lines = self.extra_lines.split(",")
+            self.extra_lines = self.extra_lines.split("\n")
 
     def run(self):
         template = self.get_finalized_command('sdist').template or "MANIFEST.in"
         self.rewriter.set_path(template)
-        log.info("rewriting %s" % self.rewriter.path)
+        if self.manifest_content is not None:
+            self.rewriter.set_append(False)
+            self.rewriter.prepend_lines(list(self.manifest_content) + [''] * 2)
         for line in self.extra_lines:
             self.rewriter.add_line(line)
+        log.info("rewriting %s" % self.rewriter.path)
         self.rewriter.rewrite()

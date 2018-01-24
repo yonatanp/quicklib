@@ -1,0 +1,2 @@
+This is an example data file that we'd want to include with our library.
+The text here is displayed when running manifested-show-text.

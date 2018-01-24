@@ -1,0 +1,16 @@
+setup:
+  name: manifested
+  description: example for setting or adding to the lines of the manifest
+  version_module_paths: manifested
+  # this overrides the default (use it to e.g. make some python files be missing)
+  # note that quicklib-created files (like __version__.py) don't need to be specified here
+  manifest:
+    - include manifested/__init__.py
+    - include manifested/included.py
+  # this only adds lines (use it to e.g. add data files)
+  manifest_extra:
+    - recursive-include manifested *.txt
+  entry_points:
+    console_scripts:
+      - manifested-show-text = manifested.included:show_text
+      - manifested-verify-exclusion = manifested.included:verify_exclusion
