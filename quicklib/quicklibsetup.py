@@ -50,7 +50,13 @@ def create_package_from_kwargs(ql_setup_kwargs, args_for_setup_script):
 
 def main():
     parser = ArgumentParser(prog="quicklib-setup", description="package a library from a YAML file")
-    parser.add_argument("--setup-yml", default="quicklib_setup.yml", help="setup YAML file")
+    parser.add_argument("-s", "--setup-yml", default="quicklib_setup.yml", help="setup YAML file")
     args, args_for_setup_script = parser.parse_known_args()
+    if not os.path.exists(args.setup_yml):
+        parser.error("file '%s' not found" % args.setup_yml)
     setup_kwargs = load_setup_from_yml(args.setup_yml)
     create_package_from_kwargs(setup_kwargs, args_for_setup_script)
+
+
+if __name__ == '__main__':
+    main()
