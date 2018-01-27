@@ -79,7 +79,8 @@ def main():
     if args.pypi_index:
         args.pip_args.extend(["-i", args.pypi_index])
         if args.pypi_index.lower().startswith("http://"):
-            args.pip_args.extend(["--trusted-host", args.pypi_index.split("://", 1)[1].split("/", 1)[0]])
+            args.pip_args.extend(["--trusted-host",
+                                  args.pypi_index.split("://", 1)[1].split("/", 1)[0].split(":", 1)[0]])
     if args.pip_find_links:
         for url in args.pip_find_links:
             args.pip_args.extend(["--find-links", url])
