@@ -99,8 +99,10 @@ pip install dist/frozen-dill-*.tar.gz
 pushd /tmp
 pip freeze | grep "^dill==0.2.5$"
 pip freeze | grep "^frozen-dill==0.2.5+"
-pip freeze | grep "^pyreadline==2.1$"
-pip uninstall -y dill frozen-dill pyreadline
+# XXX: this dependency is only installed on windows, replace dill with another example
+# pip freeze | grep "^pyreadline==2.1$"
+# pip uninstall -y dill frozen-dill pyreadline
+pip uninstall -y dill frozen-dill
 popd
 # now install an even older version with cmdline argument
 rm -rf build dist
@@ -109,7 +111,8 @@ pip install dist/frozen-dill-*.tar.gz
 pushd /tmp
 pip freeze | grep "^dill==0.2$"
 pip freeze | grep "^frozen-dill==0.2+"
-if { pip freeze | grep "pyreadline"; }; then false; fi
+# XXX: this dependency is only installed on windows, replace dill with another example
+# if { pip freeze | grep "pyreadline"; }; then false; fi
 pip uninstall -y dill frozen-dill
 popd
 cd ..
