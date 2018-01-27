@@ -1,0 +1,8 @@
+lock:
+  target:
+    name: dill
+    version: 0.2.5
+  name: frozen-dill
+  _template:
+    description: the public dill (ver %(version)s) with frozen dependencies as discovered on %(human_timestamp)s
+    version: "%(version)s+%(dateTtime)s"

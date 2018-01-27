@@ -1,0 +1,6 @@
+pytz
+chardet ~= 3.0.0
+toml ; python_version > "2"
+pyyaml ; python_version <= "3.0" and python_version > "2"
+# this will be ignored (not included in lock) when locking in a 2.7 environment
+nose ; python_version >= "3.0"

@@ -94,28 +94,29 @@ class SetupModifier(object):
                     )
                 ])
 
-        packages = kwargs.get('packages', [])
-        auto_discovered = False
-        if 'top_packages' in kwargs:
-            top_packages = kwargs.pop('top_packages')
-            if any(not re.match("^[a-zA-Z0-9_]+$", i) for i in top_packages):
-                raise ValueError("invalid top_packages %s - must be valid top_packages" % top_packages)
-            found_packages = setuptools.find_packages(include=[
-                "%s*" % p for p in top_packages
-            ])
-            # globbing "include pkg*" could bring unwanted pkg_other, so we filter specifically
-            found_packages = [p for p in found_packages if p.split(".")[0] in top_packages]
-            packages.extend([p for p in found_packages if p not in packages])
-            auto_discovered = True
-        elif self.auto_find_packages:
-            found_packages = setuptools.find_packages()
-            packages.extend([p for p in found_packages if p not in packages])
-            auto_discovered = True
-        kwargs['packages'] = packages
-        if auto_discovered:
-            print "note: some packages auto-discovered, here are the final packages:"
-            for p in kwargs['packages']:
-                print "  - %s" % (p,)
+        if 'packages' not in kwargs:
+            packages = []
+            auto_discovered = False
+            if 'top_packages' in kwargs:
+                top_packages = kwargs.pop('top_packages')
+                if any(not re.match("^[a-zA-Z0-9_]+$", i) for i in top_packages):
+                    raise ValueError("invalid top_packages %s - must be valid top_packages" % top_packages)
+                found_packages = setuptools.find_packages(include=[
+                    "%s*" % p for p in top_packages
+                ])
+                # globbing "include pkg*" could bring unwanted pkg_other, so we filter specifically
+                found_packages = [p for p in found_packages if p.split(".")[0] in top_packages]
+                packages.extend([p for p in found_packages if p not in packages])
+                auto_discovered = True
+            elif self.auto_find_packages:
+                found_packages = setuptools.find_packages()
+                packages.extend([p for p in found_packages if p not in packages])
+                auto_discovered = True
+            kwargs['packages'] = packages
+            if auto_discovered:
+                print "note: some packages auto-discovered, here are the final packages:"
+                for p in kwargs['packages']:
+                    print "  - %s" % (p,)
 
         # this is silly and should always have been true by default.
         # be explicit if you *don't* want package data (that's already been included in the manifest).

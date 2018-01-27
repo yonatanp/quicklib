@@ -45,6 +45,8 @@ setup(
     install_requires=[
         'yarg~=0.1.9',
         'PyYAML~=3.12',
+        'pip>=9.0.1',
+        'pip-tools~=1.11.0',
     ],
     tests_require=[],
     packages=find_packages(),
@@ -70,7 +72,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'quicklib-setup = quicklib.quicklibsetup:main',
+            'quicklib-setup = quicklib.cli.quicklibsetup:main',
+            'quicklib-lock = quicklib.cli.quickliblock:main',
         ],
     },
 )
