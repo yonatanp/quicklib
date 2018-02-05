@@ -14,8 +14,16 @@ class SetupYml(object):
         self._env[name] = value
 
     def overlay(self, another):
-        self._setup.update(another._setup)
-        self._lock.update(another._lock)
+        self._overlay_dict(self._setup, another._setup)
+        self._overlay_dict(self._lock, another._lock)
+
+    def _overlay_dict(self, one, another):
+        cumulative_dict_keys = ['_template']
+        another = another.copy()
+        for k in cumulative_dict_keys:
+            if k in another:
+                one.setdefault(k, {}).update(another.pop(k))
+        one.update(another)
 
     @property
     def setup(self):
@@ -48,10 +56,25 @@ class SetupYml(object):
         return result
 
     @classmethod
-    def load_includes(cls, include_strings, base_dir):
+    def load_includes(cls, include_expressions, base_dir):
         result = SetupYml()
-        for include_string in include_strings:
-            include_string = os.path.expanduser(include_string)
-            include_path = os.path.join(base_dir, include_string)
-            result.overlay(SetupYml.load_from_file(include_path))
+        for include_expr in include_expressions:
+            if isinstance(include_expr, basestring):
+                include_path = os.path.expanduser(include_expr)
+                include_path = os.path.join(base_dir, include_path)
+                included_setup_yml = SetupYml.load_from_file(include_path)
+            elif isinstance(include_expr, dict):
+                if "from" in include_expr and "import" in include_expr:
+                    exec_globals = {}
+                    exec("from %(from)s import %(import)s as imported_dict" % include_expr, exec_globals)
+                    imported_dict = exec_globals['imported_dict']
+                    if isinstance(imported_dict, SetupYml):
+                        included_setup_yml = imported_dict
+                    else:
+                        included_setup_yml = SetupYml(data_dict=imported_dict)
+                else:
+                    raise ValueError("malformatted dict include: %r" % (include_expr,))
+            else:
+                raise TypeError("malformatted include: %r" % (include_expr,))
+            result.overlay(included_setup_yml)
         return result

@@ -1,0 +1,14 @@
+include:
+  - ./regular_include.yml
+  - from: setupcommon
+    import: setup_describe_hostname
+  - from: setupcommon.locking
+    import: modified_lock_version
+
+setup:
+  name: include-by-import
+  top_packages: somerealpackage
+  version_module_paths: somerealpackage
+
+lock:
+  name: include-by-import-lock
