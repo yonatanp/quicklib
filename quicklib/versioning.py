@@ -101,7 +101,7 @@ class VersionSetCommandBase(Command):
 class GitVersionCalculator(object):
     """determine library version based on git tags and git-describe"""
     def getVersion(self):
-        git_describe = subprocess.check_output('git describe --match "*.*" --dirty=_dirty', shell=True)
+        git_describe = subprocess.check_output('git describe --match "[[:digit:]]*.[[:digit:]]*" --dirty=_dirty', shell=True)
         return self.describe_to_version(git_describe)
 
     @classmethod
