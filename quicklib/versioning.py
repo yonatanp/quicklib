@@ -133,4 +133,4 @@ class VersionSetByGit(VersionSetCommandBase):
 
 # exposed as a standalone utility
 def calculate_git_version():
-    return GitVersionCalculator().getVersion()
+    print GitVersionCalculator().getVersion()
