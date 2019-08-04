@@ -129,3 +129,8 @@ class VersionSetByGit(VersionSetCommandBase):
     SHORTNAME = "version_set_by_git"
     description = "set library version from git info"
     VERSION_CALCULATOR = GitVersionCalculator()
+
+
+# exposed as a standalone utility
+def calculate_git_version():
+    return GitVersionCalculator().getVersion()

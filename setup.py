@@ -74,6 +74,8 @@ setup(
         'console_scripts': [
             'quicklib-setup = quicklib.cli.quicklibsetup:main',
             'quicklib-lock = quicklib.cli.quickliblock:main',
+            # utilities
+            'quicklib-get-git-version = quicklib.versioning:calculate_git_version',
         ],
     },
 )
