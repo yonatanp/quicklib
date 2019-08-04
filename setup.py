@@ -44,7 +44,7 @@ setup(
     license='MIT',
     install_requires=[
         'yarg~=0.1.9',
-        'PyYAML~=3.12',
+        'PyYAML>=4.2b1',
         'pip>=9.0.1,<10',
         'pip-tools~=1.11.0',
     ],
