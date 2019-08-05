@@ -47,7 +47,7 @@ class SetupYml(object):
     @classmethod
     def load_from_file(cls, yml_path):
         import yaml
-        yml_document = yaml.load(open(yml_path, "r"))
+        yml_document = yaml.safe_load(open(yml_path, "r"))
         result = SetupYml()
         result.overlay(
             cls.load_includes(yml_document.get('include', ()), os.path.dirname(yml_path))
