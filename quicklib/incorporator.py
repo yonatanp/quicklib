@@ -36,15 +36,12 @@ class CreateIncorporatedZip(Command):
         import future
         import past
         quicklib_path = os.path.relpath(os.path.dirname(quicklib.__file__), os.getcwd())
-        # temp_path = os.path.join(os.path.dirname(quicklib_path), INCORPORATED_ZIP)
         final_path = os.path.join(quicklib_path, INCORPORATED_ZIP)
         log.info("incorporating %s from %s (and from select dependencies)" % (INCORPORATED_ZIP, os.path.abspath(quicklib_path)))
         self.zip([quicklib, future, past], final_path)
-        # shutil.move(temp_path, final_path)
         register_for_removal(final_path)
 
     def zip(self, packages, target_path, excluded_exts=(".pyc", ".pyo")):
-        # python equivalent of: zip -r quicklib_incorporated.zip quicklib -i '*.py'
         top_level_folders = [os.path.dirname(pkg.__file__) for pkg in packages]
         with zipfile.ZipFile(target_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for top_folder in top_level_folders:
@@ -52,9 +49,7 @@ class CreateIncorporatedZip(Command):
                     for f in files:
                         source_file = os.path.join(root, f)
                         arcname = os.path.relpath(source_file, os.path.dirname(top_folder))
-                        # print("ADDING?", source_file, arcname)
                         if os.path.splitext(source_file)[-1].lower() not in excluded_exts:
-                            print("ADDING:", source_file, arcname)
                             zipf.write(source_file, arcname)
 
 
