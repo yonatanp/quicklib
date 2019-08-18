@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import zip
+from past.builtins import basestring
+from builtins import object
 import os
 import re
 import sys
@@ -78,7 +82,7 @@ class SetupModifier(object):
                 kwargs['version'] = read_module_version(self.version_module_paths[0])
 
         if self.module_level_scripts:
-            self.cmd_opt_setdefault(kwargs, 'create_script_hooks', 'script_modules', self.module_level_scripts.values())
+            self.cmd_opt_setdefault(kwargs, 'create_script_hooks', 'script_modules', list(self.module_level_scripts.values()))
             kwargs \
                 .setdefault('entry_points', {}) \
                 .setdefault('console_scripts', []) \
@@ -89,8 +93,8 @@ class SetupModifier(object):
                         func_name=func_name,
                     )
                     for (script_file, (_, hook_module, func_name)) in zip(
-                        self.module_level_scripts.keys(),
-                        CreateScriptHooks.target_module_names_to_hook_module_and_func_name(self.module_level_scripts.values())
+                        list(self.module_level_scripts.keys()),
+                        CreateScriptHooks.target_module_names_to_hook_module_and_func_name(list(self.module_level_scripts.values()))
                     )
                 ])
 
@@ -114,9 +118,9 @@ class SetupModifier(object):
                 auto_discovered = True
             kwargs['packages'] = packages
             if auto_discovered:
-                print "note: some packages auto-discovered, here are the final packages:"
+                print("note: some packages auto-discovered, here are the final packages:")
                 for p in kwargs['packages']:
-                    print "  - %s" % (p,)
+                    print("  - %s" % (p,))
 
         # this is silly and should always have been true by default.
         # be explicit if you *don't* want package data (that's already been included in the manifest).
@@ -195,11 +199,11 @@ def setup(**kwargs):
         return sm.setup(**kwargs)
     except Exception as exc1:
         try:
-            print "exception caught during setup call: %s" % (exc1,)
-            print "quicklib.setup: emergency undoing of all virtual file changes"
+            print("exception caught during setup call: %s" % (exc1,))
+            print("quicklib.setup: emergency undoing of all virtual file changes")
             undo_virtual_files()
         except Exception as exc2:
-            print "ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc2
+            print("ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc2)
         raise
 
 

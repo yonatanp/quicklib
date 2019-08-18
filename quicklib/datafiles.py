@@ -1,3 +1,5 @@
+from past.builtins import basestring
+from builtins import object
 import datetime
 import os
 import textwrap

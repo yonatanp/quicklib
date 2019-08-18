@@ -1,3 +1,7 @@
+from builtins import str
+from builtins import map
+from past.builtins import basestring
+from builtins import object
 import os
 import re
 import sys
@@ -111,7 +115,7 @@ class FreezeRequirementsCommand(Command):
                 self.get_frozen_package_spec(item)
                 for item in req_list
             ]
-            for extra_cond, req_list in self.distribution.extras_require.iteritems()
+            for extra_cond, req_list in self.distribution.extras_require.items()
         }
         self.distribution.extras_require = frozen_extras_require
 
@@ -174,5 +178,5 @@ class UseRequirementsTxtCommand(Command):
     def run(self):
         for fn in self.requirements_txt:
             self.distribution.install_requires.extend(
-                map(str, parse_requirements(open(fn, "r").read()))
+                list(map(str, parse_requirements(open(fn, "r").read())))
             )

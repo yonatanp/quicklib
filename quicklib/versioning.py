@@ -1,3 +1,7 @@
+from __future__ import print_function
+from past.builtins import execfile
+from past.builtins import basestring
+from builtins import object
 import os
 import re
 import subprocess
@@ -8,6 +12,7 @@ from distutils import log
 
 from quicklib.virtualfiles import put_file
 from .virtualfiles import modify_file
+from .py23 import encoding_ascii
 
 DEV_VERSION = "0.0.0.dev0"
 
@@ -86,14 +91,14 @@ class VersionSetCommandBase(Command):
         if not os.path.splitext(module_path)[1].lower() == ".py":
             raise ValueError("expected module path of a python source (.py) file, got %s" % (module_path,))
         if os.path.exists(module_path):
-            version_module_code = open(module_path, "rb").read()
+            version_module_code = open(module_path, "r").read()
             if not re.search(RE_VERSION_CODE_LINE, version_module_code):
                 raise Exception("no version line (matching %s) found in %s, unable to replace module version" % (
                     RE_VERSION_CODE_LINE, module_path,
                 ))
             # set any version line to the given specific string version (virtual - for package only)
             modified_code = re.sub(RE_VERSION_CODE_LINE, "__version__ = '%s'" % version, version_module_code)
-            modify_file(module_path, modified_code, binary=True)
+            modify_file(module_path, modified_code, binary=False)
         else:
             put_file(module_path, create_version_block(repr(version)))
 
@@ -101,7 +106,8 @@ class VersionSetCommandBase(Command):
 class GitVersionCalculator(object):
     """determine library version based on git tags and git-describe"""
     def getVersion(self):
-        git_describe = subprocess.check_output('git describe --match "[[:digit:]]*.[[:digit:]]*" --dirty=_dirty', shell=True)
+        git_describe = subprocess.check_output('git describe --match "[[:digit:]]*.[[:digit:]]*" --dirty=_dirty',
+                                               shell=True, **encoding_ascii)
         return self.describe_to_version(git_describe)
 
     @classmethod
@@ -133,4 +139,4 @@ class VersionSetByGit(VersionSetCommandBase):
 
 # exposed as a standalone utility
 def calculate_git_version():
-    print GitVersionCalculator().getVersion()
+    print(GitVersionCalculator().getVersion())
