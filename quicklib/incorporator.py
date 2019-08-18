@@ -34,11 +34,12 @@ class CreateIncorporatedZip(Command):
     def run(self):
         import quicklib
         import future
+        import past
         quicklib_path = os.path.relpath(os.path.dirname(quicklib.__file__), os.getcwd())
         # temp_path = os.path.join(os.path.dirname(quicklib_path), INCORPORATED_ZIP)
         final_path = os.path.join(quicklib_path, INCORPORATED_ZIP)
         log.info("incorporating %s from %s (and from select dependencies)" % (INCORPORATED_ZIP, os.path.abspath(quicklib_path)))
-        self.zip([quicklib, future], final_path)
+        self.zip([quicklib, future, past], final_path)
         # shutil.move(temp_path, final_path)
         register_for_removal(final_path)
 
