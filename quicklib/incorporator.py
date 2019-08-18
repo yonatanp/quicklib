@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import textwrap
+import zipfile
 
 import pkg_resources
 from setuptools import Command
@@ -13,8 +14,8 @@ from .versioning import DEV_VERSION
 from .virtualfiles import register_for_removal
 from .datafiles import PrepareManifestIn
 
-QL_INCORPORATED = 'quicklib_incorporated'
-QL_INCORPORATED_ZIP = QL_INCORPORATED + '.zip'
+INCORPORATED = 'quicklib_incorporated'
+INCORPORATED_ZIP = INCORPORATED + '.zip'
 
 
 # ---- used by quicklib itself
@@ -32,22 +33,29 @@ class CreateIncorporatedZip(Command):
 
     def run(self):
         import quicklib
+        import future
+        import past
         quicklib_path = os.path.relpath(os.path.dirname(quicklib.__file__), os.getcwd())
-        temp_path = os.path.join(os.path.dirname(quicklib_path), QL_INCORPORATED_ZIP)
-        final_path = os.path.join(quicklib_path, QL_INCORPORATED_ZIP)
-        log.info("incorporating %s from %s" % (QL_INCORPORATED_ZIP, os.path.abspath(quicklib_path)))
-        self.zip(quicklib_path, temp_path)
-        shutil.move(temp_path, final_path)
+        # temp_path = os.path.join(os.path.dirname(quicklib_path), INCORPORATED_ZIP)
+        final_path = os.path.join(quicklib_path, INCORPORATED_ZIP)
+        log.info("incorporating %s from %s (and from select dependencies)" % (INCORPORATED_ZIP, os.path.abspath(quicklib_path)))
+        self.zip([quicklib, future, past], final_path)
+        # shutil.move(temp_path, final_path)
         register_for_removal(final_path)
 
-    def zip(self, source_path, target_path):
+    def zip(self, packages, target_path, excluded_exts=(".pyc", ".pyo")):
         # python equivalent of: zip -r quicklib_incorporated.zip quicklib -i '*.py'
-        import zipfile
+        top_level_folders = [os.path.dirname(pkg.__file__) for pkg in packages]
         with zipfile.ZipFile(target_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(source_path):
-                for f in files:
-                    if os.path.splitext(f)[-1].lower() == ".py":
-                        zipf.write(os.path.join(root, f))
+            for top_folder in top_level_folders:
+                for root, dirs, files in os.walk(top_folder):
+                    for f in files:
+                        source_file = os.path.join(root, f)
+                        arcname = os.path.relpath(source_file, os.path.dirname(top_folder))
+                        # print("ADDING?", source_file, arcname)
+                        if os.path.splitext(source_file)[-1].lower() not in excluded_exts:
+                            print("ADDING:", source_file, arcname)
+                            zipf.write(source_file, arcname)
 
 
 def create_bootstrap_block():
@@ -85,8 +93,8 @@ class BundleIncorporatedZip(Command):
             raise Exception("cowardly refusing to bundle incorportated zip when quicklib states DEV_VERSION "
                             "(path to quicklib is %s, did you remember to pip install and use that?)" %
                             os.path.dirname(os.path.abspath(quicklib.__file__)))
-        zip_path = pkg_resources.resource_filename('quicklib', QL_INCORPORATED_ZIP)
-        bundled_zip_name = "%s.v%s.zip" % (QL_INCORPORATED, version)
+        zip_path = pkg_resources.resource_filename('quicklib', INCORPORATED_ZIP)
+        bundled_zip_name = "%s.v%s.zip" % (INCORPORATED, version)
         log.info("bundling %s as %s" % (
             zip_path, bundled_zip_name))
         shutil.copy(zip_path, bundled_zip_name)
@@ -98,4 +106,4 @@ class BundleIncorporatedZip(Command):
 
 # this tells the library whether it's using a fresh (source tree) or incorporated (zip) quicklib
 def is_quicklib_incorporated():
-    return bool(re.match("^%s\\.v.*\\.zip$" % QL_INCORPORATED, os.path.dirname(os.path.dirname(quicklib.__file__))))
+    return bool(re.match("^%s\\.v.*\\.zip$" % INCORPORATED, os.path.dirname(os.path.dirname(quicklib.__file__))))
