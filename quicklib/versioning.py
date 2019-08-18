@@ -12,6 +12,7 @@ from distutils import log
 
 from quicklib.virtualfiles import put_file
 from .virtualfiles import modify_file
+from .py23 import encoding_ascii
 
 DEV_VERSION = "0.0.0.dev0"
 
@@ -106,7 +107,7 @@ class GitVersionCalculator(object):
     """determine library version based on git tags and git-describe"""
     def getVersion(self):
         git_describe = subprocess.check_output('git describe --match "[[:digit:]]*.[[:digit:]]*" --dirty=_dirty',
-                                               encoding='ascii', shell=True)
+                                               shell=True, **encoding_ascii)
         return self.describe_to_version(git_describe)
 
     @classmethod
