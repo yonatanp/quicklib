@@ -47,6 +47,7 @@ setup(
         'PyYAML>=4.2b1',
         'pip>=9.0.1,<10',
         'pip-tools~=1.11.0',
+        'future',
     ],
     tests_require=[],
     packages=find_packages(),
