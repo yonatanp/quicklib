@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import re
 import sys
@@ -114,9 +115,9 @@ class SetupModifier(object):
                 auto_discovered = True
             kwargs['packages'] = packages
             if auto_discovered:
-                print "note: some packages auto-discovered, here are the final packages:"
+                print("note: some packages auto-discovered, here are the final packages:")
                 for p in kwargs['packages']:
-                    print "  - %s" % (p,)
+                    print("  - %s" % (p,))
 
         # this is silly and should always have been true by default.
         # be explicit if you *don't* want package data (that's already been included in the manifest).
@@ -195,11 +196,11 @@ def setup(**kwargs):
         return sm.setup(**kwargs)
     except Exception as exc1:
         try:
-            print "exception caught during setup call: %s" % (exc1,)
-            print "quicklib.setup: emergency undoing of all virtual file changes"
+            print("exception caught during setup call: %s" % (exc1,))
+            print("quicklib.setup: emergency undoing of all virtual file changes")
             undo_virtual_files()
         except Exception as exc2:
-            print "ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc2
+            print("ignoring exception thrown from error-case call to undo_virtual_files (%s)" % exc2)
         raise
 
 

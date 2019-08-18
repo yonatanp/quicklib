@@ -1,6 +1,7 @@
 """
 Create boilerplate library structures from typical templates.
 """
+from __future__ import print_function
 import os
 import sys
 import textwrap
@@ -91,15 +92,15 @@ def new_library(path, args):
 
 def get_args():
     args = {}
-    print "Library and package names:"
-    print "  - the library name is what we use in 'pip install ...'"
-    print "  - the package name is what we use in 'from ... import ...'"
+    print("Library and package names:")
+    print("  - the library name is what we use in 'pip install ...'")
+    print("  - the package name is what we use in 'from ... import ...'")
     while True:
         args['libname'] = raw_input("library name (e.g. mylibrary): ")
         if args['libname']:
             break
         else:
-            print "library name cannot be left empty"
+            print("library name cannot be left empty")
     args['pkgname'] = raw_input("library name (e.g. mypackage, leave empty to reuse library name): ") or args['libname']
     args['descline'] = raw_input("optional - describe your library in one line: ") or "Library description here"
     args['url'] = raw_input("optional - url of website, documentation, repo etc: ") or "https://example.com/projects/%s" % args["libname"]
@@ -111,7 +112,7 @@ def get_args():
 if __name__ == '__main__':
     # TODO: create a real script with argparse
     if os.listdir("."):
-        print "error: run this script in an empty folder to bootstrap a new library there"
+        print("error: run this script in an empty folder to bootstrap a new library there")
         sys.exit(1)
     args = get_args()
     new_library('.', args)

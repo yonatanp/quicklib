@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import tempfile
 from argparse import ArgumentParser, SUPPRESS
@@ -31,7 +32,7 @@ def create_lock_setup_kwargs(setup_yml, target_name, target_version, timestamp, 
     lock_kwargs['install_requires'] = list(concrete_reqs)
     lock_kwargs['extras_require'] = {}
     lock_kwargs['use_requirements_txt'] = False
-    print "creating locked-library with the following setup parameters:"
+    print("creating locked-library with the following setup parameters:")
     pprint(lock_kwargs)
     return lock_kwargs
 

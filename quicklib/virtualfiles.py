@@ -1,5 +1,6 @@
 """Helper module for managing files that we want to create or modify before we package our library.
 """
+from __future__ import print_function
 import contextlib
 import os
 
@@ -42,7 +43,7 @@ class _VirtualFileRegistry(object):
                 try:
                     os.unlink(p)
                 except Exception as exc:
-                    print "error: failed to remove build-time created file %s, left on disk (exc: %s)" % (p, exc)
+                    print("error: failed to remove build-time created file %s, left on disk (exc: %s)" % (p, exc))
         finally:
             self.removal = []
 
@@ -54,7 +55,7 @@ class _VirtualFileRegistry(object):
                 try:
                     open(p, "wb").write(original_content)
                 except Exception as exc:
-                    print "error: failed to revert build-time modified file %s, left on disk in modified form (exc: %s)" % (p, exc)
+                    print("error: failed to revert build-time modified file %s, left on disk in modified form (exc: %s)" % (p, exc))
         finally:
             self.reversal = {}
 

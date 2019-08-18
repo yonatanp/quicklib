@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import re
 import subprocess
@@ -133,4 +134,4 @@ class VersionSetByGit(VersionSetCommandBase):
 
 # exposed as a standalone utility
 def calculate_git_version():
-    print GitVersionCalculator().getVersion()
+    print(GitVersionCalculator().getVersion())
