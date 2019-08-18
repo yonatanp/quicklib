@@ -1,3 +1,5 @@
+from past.builtins import basestring
+from builtins import object
 import os
 from collections import defaultdict
 
@@ -38,7 +40,7 @@ class SetupYml(object):
             kwparams = defaultdict(lambda: "undefined")
             kwparams.update(self._setup)
             kwparams.update(self._env)
-            for key, expr in lock['_template'].iteritems():
+            for key, expr in lock['_template'].items():
                 result[key] = expr % kwparams
             del lock['_template']
         result.update(lock)

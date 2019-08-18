@@ -1,6 +1,7 @@
 """Helper module for managing files that we want to create or modify before we package our library.
 """
 from __future__ import print_function
+from builtins import object
 import contextlib
 import os
 
@@ -49,7 +50,7 @@ class _VirtualFileRegistry(object):
 
     def revert(self, pre_callback=None):
         try:
-            for p, original_content in self.reversal.iteritems():
+            for p, original_content in self.reversal.items():
                 if pre_callback is not None:
                     pre_callback(p)
                 try:

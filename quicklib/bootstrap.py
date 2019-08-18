@@ -2,6 +2,8 @@
 Create boilerplate library structures from typical templates.
 """
 from __future__ import print_function
+from builtins import input
+from builtins import object
 import os
 import sys
 import textwrap
@@ -96,16 +98,16 @@ def get_args():
     print("  - the library name is what we use in 'pip install ...'")
     print("  - the package name is what we use in 'from ... import ...'")
     while True:
-        args['libname'] = raw_input("library name (e.g. mylibrary): ")
+        args['libname'] = input("library name (e.g. mylibrary): ")
         if args['libname']:
             break
         else:
             print("library name cannot be left empty")
-    args['pkgname'] = raw_input("library name (e.g. mypackage, leave empty to reuse library name): ") or args['libname']
-    args['descline'] = raw_input("optional - describe your library in one line: ") or "Library description here"
-    args['url'] = raw_input("optional - url of website, documentation, repo etc: ") or "https://example.com/projects/%s" % args["libname"]
-    args['author'] = raw_input("optional - author name (person or company): ") or "Dr. contributor (or) Company Inc."
-    args['author_email'] = raw_input("optional - author contact email: ") or "you@example.com"
+    args['pkgname'] = input("library name (e.g. mypackage, leave empty to reuse library name): ") or args['libname']
+    args['descline'] = input("optional - describe your library in one line: ") or "Library description here"
+    args['url'] = input("optional - url of website, documentation, repo etc: ") or "https://example.com/projects/%s" % args["libname"]
+    args['author'] = input("optional - author name (person or company): ") or "Dr. contributor (or) Company Inc."
+    args['author_email'] = input("optional - author contact email: ") or "you@example.com"
     return args
 
 

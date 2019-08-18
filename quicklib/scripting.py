@@ -1,3 +1,4 @@
+from past.builtins import basestring
 import os
 import textwrap
 
@@ -35,7 +36,7 @@ class CreateScriptHooks(Command):
             hook_module_path_to_functions.setdefault(hook_module_path, {})[func_name] = target_module
         return {
             hook_module_path: self.create_script_hooks_module_text(functions)
-            for hook_module_path, functions in hook_module_path_to_functions.iteritems()
+            for hook_module_path, functions in hook_module_path_to_functions.items()
         }
 
     # must be translated as one, since we include the index;
@@ -69,9 +70,9 @@ class CreateScriptHooks(Command):
             function_template % dict(
                 func_name=func_name, target_module_name=target_module_name,
             )
-            for func_name, target_module_name in functions.iteritems()
+            for func_name, target_module_name in functions.items()
         ])
 
     def run(self):
-        for hook_module_path, script_content in self.hook_modules.iteritems():
+        for hook_module_path, script_content in self.hook_modules.items():
             put_file(hook_module_path, script_content)
