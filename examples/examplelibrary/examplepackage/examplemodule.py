@@ -1,4 +1,6 @@
-print "examplemodule being imported"
+from __future__ import print_function
+
+print("examplemodule being imported")
 
 def example_function():
-    print "example_function running"
+    print("example_function running")
