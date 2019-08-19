@@ -33,15 +33,14 @@ class CreateIncorporatedZip(Command):
 
     def run(self):
         import quicklib
-        import future
-        import past
         quicklib_path = os.path.relpath(os.path.dirname(quicklib.__file__), os.getcwd())
         final_path = os.path.join(quicklib_path, INCORPORATED_ZIP)
         log.info("incorporating %s from %s (and from select dependencies)" % (INCORPORATED_ZIP, os.path.abspath(quicklib_path)))
-        self.zip([quicklib, future, past], final_path)
+        self.create_zip(final_path)
         register_for_removal(final_path)
 
-    def zip(self, packages, target_path, excluded_exts=(".pyc", ".pyo")):
+    def create_zip(self, target_path, excluded_exts=(".pyc", ".pyo")):
+        packages = self._pacakges_to_incorporate()
         top_level_folders = [os.path.dirname(pkg.__file__) for pkg in packages]
         with zipfile.ZipFile(target_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for top_folder in top_level_folders:
@@ -51,6 +50,14 @@ class CreateIncorporatedZip(Command):
                         arcname = os.path.relpath(source_file, os.path.dirname(top_folder))
                         if os.path.splitext(source_file)[-1].lower() not in excluded_exts:
                             zipf.write(source_file, arcname)
+
+    def _pacakges_to_incorporate(self):
+        import quicklib
+        import future
+        import past
+        import libfuturize
+        import libpasteurize
+        return [quicklib, future, past, libfuturize, libpasteurize]
 
 
 def create_bootstrap_block():
