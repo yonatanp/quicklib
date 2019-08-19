@@ -1,5 +1,5 @@
-from builtins import map
-from builtins import str
+from .py23.builtins import map
+from .py23.builtins import str
 import glob
 import os
 import shutil

@@ -1,5 +1,5 @@
 from past.builtins import basestring
-from builtins import object
+from ..py23.builtins import object
 import os
 from collections import defaultdict
 

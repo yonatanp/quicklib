@@ -2,8 +2,8 @@
 Create boilerplate library structures from typical templates.
 """
 from __future__ import print_function
-from builtins import input
-from builtins import object
+from .py23.builtins import input
+from .py23.builtins import object
 import os
 import sys
 import textwrap
