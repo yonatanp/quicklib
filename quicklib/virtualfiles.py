@@ -1,7 +1,7 @@
 """Helper module for managing files that we want to create or modify before we package our library.
 """
 from __future__ import print_function
-from builtins import object
+from .py23.builtins import object
 import contextlib
 import os
 

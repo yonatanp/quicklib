@@ -1,7 +1,7 @@
-from builtins import str
-from builtins import map
+from .py23.builtins import str
+from .py23.builtins import map
 from past.builtins import basestring
-from builtins import object
+from .py23.builtins import object
 import os
 import re
 import sys
