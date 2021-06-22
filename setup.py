@@ -45,8 +45,7 @@ setup(
     install_requires=[
         'yarg~=0.1.9',
         'PyYAML>=4.2b1',
-        'pip>=9.0.1,<10',
-        'pip-tools~=1.11.0',
+        'pip-tools~=6.0',
         'future',
     ],
     tests_require=[],
@@ -54,10 +53,11 @@ setup(
     package_data={'quicklib': ['quicklib_incorporated.zip']},
     platforms='any',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Intended Audience :: Developers',

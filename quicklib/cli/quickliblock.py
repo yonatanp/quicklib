@@ -6,10 +6,11 @@ from argparse import ArgumentParser, SUPPRESS
 from datetime import datetime
 from pprint import pprint
 
-import pip.req
+from piptools.locations import CACHE_DIR as DEFAULT_CACHE_DIR
 from piptools.resolver import Resolver
+from piptools.cache import DependencyCache
 from piptools.repositories import PyPIRepository
-from piptools.scripts.compile import get_pip_command
+from piptools._compat import parse_requirements
 
 from .setupyml import SetupYml
 from .quicklibsetup import create_package_from_kwargs
@@ -39,18 +40,17 @@ def create_lock_setup_kwargs(setup_yml, target_name, target_version, timestamp, 
 
 
 def make_concrete(reqs, pip_args=(), prereleases=False):
-    tmpfile = tempfile.mktemp("-requirements.txt", "ql-lock-")
-    open(tmpfile, "w").write("\n".join(reqs))
+    tmp_repository = PyPIRepository(pip_args, DEFAULT_CACHE_DIR)
+    tmp_file = tempfile.mktemp("-requirements.txt", "ql-lock-")
+    open(tmp_file, "w").write("\n".join(reqs))
     try:
-        constraints = list(pip.req.parse_requirements(tmpfile, session=pip._vendor.requests))
+        constraints = list(parse_requirements(tmp_file, tmp_repository.session))
     finally:
-        os.unlink(tmpfile)
-    pip_command = get_pip_command()
-    # pip_args = [] # + ["-i", "http://...", "--trusted-host", "..."]
-    pip_options, _ = pip_command.parse_args(pip_args)
-    session = pip_command._build_session(pip_options)
-    pypi = PyPIRepository(pip_options=pip_options, session=session)
-    resolver = Resolver(constraints=constraints, repository=pypi, clear_caches=True, prereleases=prereleases)
+        os.unlink(tmp_file)
+    resolver = Resolver(
+        constraints=constraints, repository=tmp_repository, cache=DependencyCache(DEFAULT_CACHE_DIR),
+        clear_caches=True, prereleases=prereleases
+    )
     concrete_reqs = resolver.resolve()
     simple_req_lines = [str(i.req) for i in concrete_reqs]
     return simple_req_lines
