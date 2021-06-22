@@ -6,7 +6,7 @@ from argparse import ArgumentParser, SUPPRESS
 from datetime import datetime
 from pprint import pprint
 
-import pip.req
+import pip
 from piptools.resolver import Resolver
 from piptools.repositories import PyPIRepository
 from piptools.scripts.compile import get_pip_command
@@ -42,7 +42,7 @@ def make_concrete(reqs, pip_args=(), prereleases=False):
     tmpfile = tempfile.mktemp("-requirements.txt", "ql-lock-")
     open(tmpfile, "w").write("\n".join(reqs))
     try:
-        constraints = list(pip.req.parse_requirements(tmpfile, session=pip._vendor.requests))
+        constraints = list(_pip_parse_requirements(tmpfile))
     finally:
         os.unlink(tmpfile)
     pip_command = get_pip_command()
@@ -54,6 +54,22 @@ def make_concrete(reqs, pip_args=(), prereleases=False):
     concrete_reqs = resolver.resolve()
     simple_req_lines = [str(i.req) for i in concrete_reqs]
     return simple_req_lines
+
+
+def _pip_parse_requirements(filename):
+    """We are using internal pip implementation to avoid re-coding the same wheel.
+    This is not optimal and may break with newer pip versions.
+    """
+    try:
+        # works for pip < 10
+        from pip.req import parse_requirements
+    except ImportError:
+        # works so far for all pip >= 10
+        try:
+            from pip._internal.req import parse_requirements
+        except ImportError:
+            raise Exception("pip %s not supported for locking libraries, please open a github issue" % pip.__version__)
+    return parse_requirements(filename=filename, session=pip._vendor.requests)
 
 
 def main():
