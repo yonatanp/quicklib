@@ -45,8 +45,7 @@ setup(
     install_requires=[
         'yarg~=0.1.9',
         'PyYAML>=4.2b1',
-        'pip',
-        'pip-tools~=1.11.0',
+        'pip-tools~=6.0',
         'future',
     ],
     tests_require=[],

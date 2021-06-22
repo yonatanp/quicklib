@@ -6,10 +6,11 @@ from argparse import ArgumentParser, SUPPRESS
 from datetime import datetime
 from pprint import pprint
 
-import pip
+from piptools.locations import CACHE_DIR as DEFAULT_CACHE_DIR
 from piptools.resolver import Resolver
+from piptools.cache import DependencyCache
 from piptools.repositories import PyPIRepository
-from piptools.scripts.compile import get_pip_command
+from piptools._compat import parse_requirements
 
 from .setupyml import SetupYml
 from .quicklibsetup import create_package_from_kwargs
@@ -39,37 +40,20 @@ def create_lock_setup_kwargs(setup_yml, target_name, target_version, timestamp, 
 
 
 def make_concrete(reqs, pip_args=(), prereleases=False):
-    tmpfile = tempfile.mktemp("-requirements.txt", "ql-lock-")
-    open(tmpfile, "w").write("\n".join(reqs))
+    tmp_repository = PyPIRepository(pip_args, DEFAULT_CACHE_DIR)
+    tmp_file = tempfile.mktemp("-requirements.txt", "ql-lock-")
+    open(tmp_file, "w").write("\n".join(reqs))
     try:
-        constraints = list(_pip_parse_requirements(tmpfile))
+        constraints = list(parse_requirements(tmp_file, tmp_repository.session))
     finally:
-        os.unlink(tmpfile)
-    pip_command = get_pip_command()
-    # pip_args = [] # + ["-i", "http://...", "--trusted-host", "..."]
-    pip_options, _ = pip_command.parse_args(pip_args)
-    session = pip_command._build_session(pip_options)
-    pypi = PyPIRepository(pip_options=pip_options, session=session)
-    resolver = Resolver(constraints=constraints, repository=pypi, clear_caches=True, prereleases=prereleases)
+        os.unlink(tmp_file)
+    resolver = Resolver(
+        constraints=constraints, repository=tmp_repository, cache=DependencyCache(DEFAULT_CACHE_DIR),
+        clear_caches=True, prereleases=prereleases
+    )
     concrete_reqs = resolver.resolve()
     simple_req_lines = [str(i.req) for i in concrete_reqs]
     return simple_req_lines
-
-
-def _pip_parse_requirements(filename):
-    """We are using internal pip implementation to avoid re-coding the same wheel.
-    This is not optimal and may break with newer pip versions.
-    """
-    try:
-        # works for pip < 10
-        from pip.req import parse_requirements
-    except ImportError:
-        # works so far for all pip >= 10
-        try:
-            from pip._internal.req import parse_requirements
-        except ImportError:
-            raise Exception("pip %s not supported for locking libraries, please open a github issue" % pip.__version__)
-    return parse_requirements(filename=filename, session=pip._vendor.requests)
 
 
 def main():
