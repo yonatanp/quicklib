@@ -1,7 +1,5 @@
 """Helper module for managing files that we want to create or modify before we package our library.
 """
-from __future__ import print_function
-from .py23.builtins import object
 import contextlib
 import os
 
@@ -9,7 +7,7 @@ from setuptools import Command
 from distutils import log
 
 
-class _VirtualFileRegistry(object):
+class _VirtualFileRegistry:
     def __init__(self):
         self.removal = []
         self.reversal = {}

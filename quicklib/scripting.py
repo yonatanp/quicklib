@@ -1,4 +1,3 @@
-from past.builtins import basestring
 import os
 import textwrap
 
@@ -22,7 +21,7 @@ class CreateScriptHooks(Command):
     def finalize_options(self):
         if self.script_modules is None:
             self.script_modules = []
-        elif isinstance(self.script_modules, basestring):
+        elif isinstance(self.script_modules, str):
             self.script_modules = self.script_modules.split(",")
         if not self.script_modules:
             log.warn("warning: no script_modules provided, CreateScriptHooks command will have no effect")

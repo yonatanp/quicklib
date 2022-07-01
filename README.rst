@@ -247,7 +247,7 @@ e.g.:
 .. code:: Python
 
         import mypackage
-        print mypackage.version.__version__
+        print(mypackage.version.__version__)
 
 versioning multiple packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

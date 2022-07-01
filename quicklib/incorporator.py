@@ -53,11 +53,7 @@ class CreateIncorporatedZip(Command):
 
     def _pacakges_to_incorporate(self):
         import quicklib
-        import future
-        import past
-        import libfuturize
-        import libpasteurize
-        return [quicklib, future, past, libfuturize, libpasteurize]
+        return [quicklib]
 
 
 def create_bootstrap_block():

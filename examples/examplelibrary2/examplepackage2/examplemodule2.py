@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 print("examplemodule2 being imported")
 
 def example_function_2():

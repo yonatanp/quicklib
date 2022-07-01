@@ -1,7 +1,3 @@
-from __future__ import print_function
-from .py23.builtins import zip
-from past.builtins import basestring
-from .py23.builtins import object
 import os
 import re
 import sys
@@ -21,7 +17,7 @@ from .datafiles import PrepareManifestIn
 from .requirements import UseRequirementsTxtCommand, DynamicRequirementsCommand, FreezeRequirementsCommand
 
 
-class SetupModifier(object):
+class SetupModifier:
     def __init__(self, auto_find_packages=True):
         self.auto_find_packages = auto_find_packages
         self.use_requirements_txt = True
@@ -45,7 +41,7 @@ class SetupModifier(object):
             self.freeze_requirements_params = dict(value)
 
     def set_version_modules(self, module_paths):
-        if isinstance(module_paths, basestring):
+        if isinstance(module_paths, str):
             module_paths = [module_paths]
         self.version_module_paths = list(module_paths)
 
