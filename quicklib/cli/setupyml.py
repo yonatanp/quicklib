@@ -1,10 +1,8 @@
-from past.builtins import basestring
-from ..py23.builtins import object
 import os
 from collections import defaultdict
 
 
-class SetupYml(object):
+class SetupYml:
     def __init__(self, data_dict=None):
         if data_dict is None:
             data_dict = {}
@@ -61,7 +59,7 @@ class SetupYml(object):
     def load_includes(cls, include_expressions, base_dir):
         result = SetupYml()
         for include_expr in include_expressions:
-            if isinstance(include_expr, basestring):
+            if isinstance(include_expr, str):
                 include_path = os.path.expanduser(include_expr)
                 include_path = os.path.join(base_dir, include_path)
                 included_setup_yml = SetupYml.load_from_file(include_path)

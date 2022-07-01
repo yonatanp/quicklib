@@ -52,7 +52,7 @@ pip_uninstall_examples
 quicklib-setup sdist
 pip install dist/minimal-*.tar.gz
 pushd /tmp
-python -c 'from __future__ import print_function; import minimalpkg.__version__; print("minimalpkg version:", minimalpkg.__version__.__version__)'
+python -c 'import minimalpkg.__version__; print("minimalpkg version:", minimalpkg.__version__.__version__)'
 how-minimal | grep "so minimal"
 popd
 cd ..
@@ -64,7 +64,7 @@ pip_uninstall_examples
 quicklib-setup sdist
 pip install dist/manifested-*.tar.gz
 pushd /tmp
-python -c 'from __future__ import print_function; import manifested.__version__; print("manifested version:", manifested.__version__.__version__)'
+python -c 'import manifested.__version__; print("manifested version:", manifested.__version__.__version__)'
 manifested-show-text | grep "The text here is displayed when running manifested-show-text"
 # this is broken, reactivate when manifest=... works for excluding files
 # manifested-verify-exclusion

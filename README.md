@@ -187,7 +187,7 @@ In addition, tell `setup.py` where to find those files:
 Then, your users can programmatically query this version value by running e.g.:
 ````Python
     import mypackage
-    print mypackage.version.__version__
+    print(mypackage.version.__version__)
 ````
 
 #### versioning multiple packages

@@ -1,7 +1,3 @@
-from .py23.builtins import str
-from .py23.builtins import map
-from past.builtins import basestring
-from .py23.builtins import object
 import os
 import re
 import sys
@@ -81,7 +77,7 @@ class FreezeRequirementsCommand(Command):
 
     def finalize_options(self):
         # giving a string spec for the external plugin helps when it depends on a package available only when packaging
-        if isinstance(self.server_plugin, basestring):
+        if isinstance(self.server_plugin, str):
             self.server_plugin = self._load_plugin_from_spec()
 
     PLUGIN_IMPORT_SPEC = "^([0-9a-zA-Z_.]+)(?::([0-9a-zA-Z_]+)(\\(\\))?)?$"
@@ -98,7 +94,7 @@ class FreezeRequirementsCommand(Command):
             "from %s import %s as plugin" % (module_name, member_name) if member_name else
             "import %s as plugin" % module_name
         )
-        exec (import_command, exec_globals)
+        exec(import_command, exec_globals)
         plugin = exec_globals['plugin']
         if should_invoke:
             plugin = plugin()
@@ -140,7 +136,7 @@ class FreezeRequirementsCommand(Command):
         req.specifier = Requirement.parse("dummy==%s" % specific_version).specifier
 
 
-class StandardPypiServerPlugin(object):
+class StandardPypiServerPlugin:
     @staticmethod
     def get_ordered_package_versions(package_name, pypi_server=None):
         # imported here so that it's only needed in packaging time
@@ -172,11 +168,11 @@ class UseRequirementsTxtCommand(Command):
                 self.requirements_txt = [default_requirements_txt]
             else:
                 self.requirements_txt = []
-        elif isinstance(self.requirements_txt, basestring):
+        elif isinstance(self.requirements_txt, str):
             self.requirements_txt = self.requirements_txt.split(",")
 
     def run(self):
         for fn in self.requirements_txt:
             self.distribution.install_requires.extend(
-                list(map(str, parse_requirements(open(fn, "r").read())))
+                map(str, parse_requirements(open(fn, "r").read()))
             )

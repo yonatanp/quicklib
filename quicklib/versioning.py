@@ -1,7 +1,3 @@
-from __future__ import print_function
-from past.builtins import execfile
-from past.builtins import basestring
-from .py23.builtins import object
 import os
 import re
 import subprocess
@@ -12,7 +8,6 @@ from distutils import log
 
 from quicklib.virtualfiles import put_file
 from .virtualfiles import modify_file
-from .py23 import encoding_ascii
 
 DEV_VERSION = "0.0.0.dev0"
 
@@ -44,7 +39,7 @@ def normalize_version_module_path(version_module_path):
 def read_module_version(version_module_path):
     version_module_path = normalize_version_module_path(version_module_path)
     version_load_vars = {}
-    execfile(version_module_path, version_load_vars)
+    exec(open(version_module_path).read(), version_load_vars)
     return version_load_vars['__version__']
 
 
@@ -63,8 +58,8 @@ class VersionSetCommandBase(Command):
     def finalize_options(self):
         if self.version_module_paths is None:
             self.version_module_paths = []
-        elif isinstance(self.version_module_paths, basestring):
-            self.version_module_paths = self.version_module_paths.split(",")
+        elif isinstance(self.version_module_paths, str):
+            self.version_module_paths = list(map(str.strip, self.version_module_paths.split(",")))
         if not self.version_module_paths:
             log.warn("warning: no version_module_paths provided, SetVersion command will have no effect")
 
@@ -86,7 +81,7 @@ class VersionSetCommandBase(Command):
         """
         create or modify (virtually) the module at the given path to have a `__version__ = [version]` code line.
         """
-        if not isinstance(module_path, basestring):
+        if not isinstance(module_path, str):
             raise TypeError("expected string module path, got %r" % (module_path,))
         if not os.path.splitext(module_path)[1].lower() == ".py":
             raise ValueError("expected module path of a python source (.py) file, got %s" % (module_path,))
@@ -103,11 +98,11 @@ class VersionSetCommandBase(Command):
             put_file(module_path, create_version_block(repr(version)))
 
 
-class GitVersionCalculator(object):
+class GitVersionCalculator:
     """determine library version based on git tags and git-describe"""
     def getVersion(self):
         git_describe = subprocess.check_output('git describe --match "[[:digit:]]*.[[:digit:]]*" --dirty=_dirty',
-                                               shell=True, **encoding_ascii)
+                                               shell=True, encoding='ascii')
         return self.describe_to_version(git_describe)
 
     @classmethod

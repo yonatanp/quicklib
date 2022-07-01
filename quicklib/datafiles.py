@@ -1,5 +1,3 @@
-from past.builtins import basestring
-from .py23.builtins import object
 import datetime
 import os
 import textwrap
@@ -10,7 +8,7 @@ from distutils import log
 from .virtualfiles import modify_file, put_file
 
 
-class ManifestInRewriter(object):
+class ManifestInRewriter:
     def __init__(self, path=None, append=True):
         self.path = path
         self.append = append
@@ -114,9 +112,9 @@ class PrepareManifestIn(Command):
         self.extra_lines = []
 
     def finalize_options(self):
-        if isinstance(self.manifest_content, basestring):
+        if isinstance(self.manifest_content, str):
             self.manifest_content = self.manifest_content.split("\n")
-        if isinstance(self.extra_lines, basestring):
+        if isinstance(self.extra_lines, str):
             self.extra_lines = self.extra_lines.split("\n")
 
     def run(self):

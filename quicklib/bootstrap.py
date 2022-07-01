@@ -1,9 +1,6 @@
 """
 Create boilerplate library structures from typical templates.
 """
-from __future__ import print_function
-from .py23.builtins import input
-from .py23.builtins import object
 import os
 import sys
 import textwrap
@@ -11,7 +8,7 @@ import textwrap
 from . import incorporator, versioning
 
 
-class TemplateMaker(object):
+class TemplateMaker:
     def __init__(self, path, args={}):
         self.path = path
         self.args = args

@@ -1,5 +1,3 @@
-from __future__ import print_function
-from ..py23.builtins import str
 import os
 import tempfile
 from argparse import ArgumentParser, SUPPRESS
