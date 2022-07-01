@@ -1,7 +1,2 @@
 setup:
   url: "http://example.com"
-
-lock:
-  _template:
-    url: "http://example.com/locked-%(name)s"
-    # description: locked version of %(description)s (locked at %(human_timestamp)s)

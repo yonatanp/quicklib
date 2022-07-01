@@ -36,6 +36,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
+      - name: Fix git checkout
+        # this is needed to make sure "git describe" is completely accurate under github action workflow
+        # see https://github.com/actions/checkout/issues/290#issuecomment-680260080
+        run: git fetch --tags --force
       - name: Build, install and test
         shell: bash
         run: |
