@@ -39,6 +39,7 @@ jobs:
       - name: Build, install and test
         shell: bash
         run: |
+          python -m pip install wheel
           python setup.py sdist
           python setup.py bdist_wheel
           python setup.py install
