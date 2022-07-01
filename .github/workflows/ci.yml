@@ -60,3 +60,11 @@ jobs:
         with:
           name: library_binary
           path: dist/*.whl
+      - name: Publish library to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: github.event_name == 'push' && 'refs/heads/master' == github.ref
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          print_hash: true
