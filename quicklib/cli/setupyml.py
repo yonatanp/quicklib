@@ -7,7 +7,6 @@ class SetupYml:
         if data_dict is None:
             data_dict = {}
         self._setup = data_dict.get('setup', {})
-        self._lock = data_dict.get('lock', {})
         self._env = {}
 
     def set_env_var(self, name, value):
@@ -15,7 +14,6 @@ class SetupYml:
 
     def overlay(self, another):
         self._overlay_dict(self._setup, another._setup)
-        self._overlay_dict(self._lock, another._lock)
 
     def _overlay_dict(self, one, another):
         cumulative_dict_keys = ['_template']
@@ -28,21 +26,6 @@ class SetupYml:
     @property
     def setup(self):
         return self._setup.copy()
-
-    @property
-    def lock(self):
-        result = {}
-        lock = self._lock.copy()
-        if "_template" in lock:
-            # apply template things
-            kwparams = defaultdict(lambda: "undefined")
-            kwparams.update(self._setup)
-            kwparams.update(self._env)
-            for key, expr in lock['_template'].items():
-                result[key] = expr % kwparams
-            del lock['_template']
-        result.update(lock)
-        return result
 
     @classmethod
     def load_from_file(cls, yml_path):

@@ -39,12 +39,14 @@ class CreateIncorporatedZip(Command):
         self.create_zip(final_path)
         register_for_removal(final_path)
 
-    def create_zip(self, target_path, excluded_exts=(".pyc", ".pyo")):
+    def create_zip(self, target_path, excluded_exts=(".pyc", ".pyo"), excluded_dirs=('__pycache__',)):
         packages = self._pacakges_to_incorporate()
         top_level_folders = [os.path.dirname(pkg.__file__) for pkg in packages]
         with zipfile.ZipFile(target_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for top_folder in top_level_folders:
                 for root, dirs, files in os.walk(top_folder):
+                    if root in excluded_dirs:
+                        continue
                     for f in files:
                         source_file = os.path.join(root, f)
                         arcname = os.path.relpath(source_file, os.path.dirname(top_folder))

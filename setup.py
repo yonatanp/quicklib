@@ -45,7 +45,6 @@ setup(
     install_requires=[
         'yarg~=0.1.9',
         'PyYAML>=4.2b1',
-        'pip-tools~=6.0',
     ],
     tests_require=[],
     python_requires=">=3.7",
@@ -72,7 +71,6 @@ setup(
     entry_points={
         'console_scripts': [
             'quicklib-setup = quicklib.cli.quicklibsetup:main',
-            'quicklib-lock = quicklib.cli.quickliblock:main',
             # utilities
             'quicklib-get-git-version = quicklib.versioning:calculate_git_version',
         ],

@@ -36,6 +36,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
+      - name: Fix git checkout
+        # this is needed to make sure "git describe" is completely accurate under github action workflow
+        # see https://github.com/actions/checkout/issues/290#issuecomment-680260080
+        run: git fetch --tags --force
       - name: Build, install and test
         shell: bash
         run: |
@@ -44,15 +48,31 @@ jobs:
           python setup.py bdist_wheel
           python setup.py install
           tests/setup_examples.sh
-      - name: Archive source dist
+      - name: Archive library
         if: ${{ matrix.archive-artifacts }}
         uses: actions/upload-artifact@v3
         with:
-          name: library_source
-          path: dist/*.tar.gz
-      - name: Archive binary dist
-        if: ${{ matrix.archive-artifacts }}
-        uses: actions/upload-artifact@v3
+          name: library
+          path: |
+            dist/*.tar.gz
+            dist/*.whl
+
+  productionalize:
+    name: Productionalize
+    needs: test
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download library
+        uses: actions/download-artifact@v3
         with:
-          name: library_binary
-          path: dist/*.whl
+          name: library
+          path: dist
+      - name: Publish library to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: github.event_name == 'push' && 'refs/heads/master' == github.ref
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          print_hash: true
