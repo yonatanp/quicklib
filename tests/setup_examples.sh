@@ -71,48 +71,48 @@ manifested-show-text | grep "The text here is displayed when running manifested-
 popd
 cd ..
 
-# locking
-cd locking
-rm -rf build dist
-quicklib-setup sdist
-pip install dist/app-lib-*.tar.gz
-pushd /tmp
-lockapp
-popd
-pip uninstall -y app-lib
-quicklib-lock sdist --find-links ./dist
-pip install dist/locked-app-lib-*.tar.gz --find-links ./dist
-pushd /tmp
-lockapp
-pip freeze | grep "^app-lib=="
-pip freeze | grep "^locked-app-lib=="
-pip uninstall -y app-lib
-pip uninstall -y locked-app-lib
-popd
-cd ..
-
-# locking a public external library
-cd locking_external
-rm -rf build dist
-quicklib-lock sdist
-pip install dist/frozen-dill-*.tar.gz
-pushd /tmp
-pip freeze | grep "^dill==0.2.5$"
-pip freeze | grep "^frozen-dill==0.2.5+"
-# XXX: this dependency is only installed on windows, replace dill with another example
-# pip freeze | grep "^pyreadline==2.1$"
-# pip uninstall -y dill frozen-dill pyreadline
-pip uninstall -y dill frozen-dill
-popd
-# now install an even older version with cmdline argument
-rm -rf build dist
-quicklib-lock sdist --version 0.2
-pip install dist/frozen-dill-*.tar.gz
-pushd /tmp
-pip freeze | grep "^dill==0.2$"
-pip freeze | grep "^frozen-dill==0.2+"
-# XXX: this dependency is only installed on windows, replace dill with another example
-# if { pip freeze | grep "pyreadline"; }; then false; fi
-pip uninstall -y dill frozen-dill
-popd
-cd ..
+## locking
+#cd locking
+#rm -rf build dist
+#quicklib-setup sdist
+#pip install dist/app-lib-*.tar.gz
+#pushd /tmp
+#lockapp
+#popd
+#pip uninstall -y app-lib
+#quicklib-lock sdist --find-links ./dist
+#pip install dist/locked-app-lib-*.tar.gz --find-links ./dist
+#pushd /tmp
+#lockapp
+#pip freeze | grep "^app-lib=="
+#pip freeze | grep "^locked-app-lib=="
+#pip uninstall -y app-lib
+#pip uninstall -y locked-app-lib
+#popd
+#cd ..
+#
+## locking a public external library
+#cd locking_external
+#rm -rf build dist
+#quicklib-lock sdist
+#pip install dist/frozen-dill-*.tar.gz
+#pushd /tmp
+#pip freeze | grep "^dill==0.2.5$"
+#pip freeze | grep "^frozen-dill==0.2.5+"
+## XXX: this dependency is only installed on windows, replace dill with another example
+## pip freeze | grep "^pyreadline==2.1$"
+## pip uninstall -y dill frozen-dill pyreadline
+#pip uninstall -y dill frozen-dill
+#popd
+## now install an even older version with cmdline argument
+#rm -rf build dist
+#quicklib-lock sdist --version 0.2
+#pip install dist/frozen-dill-*.tar.gz
+#pushd /tmp
+#pip freeze | grep "^dill==0.2$"
+#pip freeze | grep "^frozen-dill==0.2+"
+## XXX: this dependency is only installed on windows, replace dill with another example
+## if { pip freeze | grep "pyreadline"; }; then false; fi
+#pip uninstall -y dill frozen-dill
+#popd
+#cd ..
