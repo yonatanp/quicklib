@@ -107,6 +107,14 @@ class SetupModifier:
                 # globbing "include pkg*" could bring unwanted pkg_other, so we filter specifically
                 found_packages = [p for p in found_packages if p.split(".")[0] in top_packages]
                 packages.extend([p for p in found_packages if p not in packages])
+                # also find any packages under a top namespace that has one of the provided names
+                ns_packages = [p for p in setuptools.find_namespace_packages() if p.split(".")[0] in top_packages]
+                for ns_package in ns_packages:
+                    ns_path = os.path.join(*ns_package.split("."))
+                    for package in setuptools.find_packages(where=ns_path):
+                        full_package = ns_package + "." + package
+                        if full_package not in packages:
+                            packages.append(full_package)
                 auto_discovered = True
             elif self.auto_find_packages:
                 found_packages = setuptools.find_packages()
