@@ -130,7 +130,7 @@ class SetupModifier:
             long_description = kwargs['long_description']
             assert set(long_description.keys()) == {'filename', 'content_type'}, \
                 "please provide the keys 'filename' and 'content_type' under the 'long_description' parameter"
-            kwargs['long_description'] = open(long_description['filename'], "r").read()
+            kwargs['long_description'] = open(long_description['filename'], "r", encoding='utf-8').read()
             kwargs['long_description_content_type'] = long_description['content_type']
 
         # this is silly and should always have been true by default.
